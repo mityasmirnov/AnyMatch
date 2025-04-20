@@ -6,11 +6,12 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   OAuthProvider
 } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { Toast, useToast } from '../components/ui/toast';
+import { useToast } from '../components/ui/toast-provider';
 
 // Create context
 const AuthContext = createContext(null);
@@ -125,19 +126,36 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Handle redirect result
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          const provider = result.providerId;
+          toast({
+            title: `Signed in with ${provider === 'apple.com' ? 'Apple' : 'Google'}`,
+            description: "You have successfully signed in.",
+            variant: "success"
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Sign in failed",
+          description: error.message,
+          variant: "error"
+        });
+      }
+    };
+
+    handleRedirectResult();
+  }, [auth]);
+
   // Sign in with Google
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      const { user } = await signInWithPopup(auth, provider);
-      
-      toast({
-        title: "Signed in with Google",
-        description: "You have successfully signed in with Google.",
-        variant: "success"
-      });
-      
-      return user;
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       toast({
         title: "Google sign in failed",
@@ -154,16 +172,7 @@ export const AuthProvider = ({ children }) => {
       const provider = new OAuthProvider('apple.com');
       provider.addScope('email');
       provider.addScope('name');
-      
-      const { user } = await signInWithPopup(auth, provider);
-      
-      toast({
-        title: "Signed in with Apple",
-        description: "You have successfully signed in with Apple.",
-        variant: "success"
-      });
-      
-      return user;
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       toast({
         title: "Apple sign in failed",

@@ -94,17 +94,46 @@ const SwipeCard = ({
         <Card className="h-[500px] overflow-hidden">
           <div 
             className="h-[350px] bg-cover bg-center"
-            style={{ backgroundImage: `url(${movie.coverUrl})` }}
+            style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w500${movie.posterPath})` }}
           />
           <div className="p-4">
             <h3 className="text-xl font-bold">{movie.title}</h3>
             <div className="flex items-center mt-1 text-sm">
-              <span className="text-gray-600">{movie.genre}</span>
+              <span className="text-gray-600">
+                {movie.releaseDate?.split('-')[0]}
+              </span>
               <span className="ml-auto bg-primary-100 text-primary-800 px-2 py-0.5 rounded-full">
-                ★ {movie.rating.toFixed(1)}
+                ★ {movie.voteAverage.toFixed(1)}
               </span>
             </div>
-            <p className="mt-2 text-sm text-gray-600 line-clamp-2">{movie.description}</p>
+            <p className="mt-2 text-sm text-gray-600 line-clamp-2">{movie.overview}</p>
+            
+            {/* Watch providers */}
+            {movie.watchProviders && (
+              <div className="mt-3">
+                <h4 className="text-sm font-semibold mb-1">Available on:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {movie.watchProviders.flatrate?.map((provider) => (
+                    <img
+                      key={provider.provider_id}
+                      src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                      alt={provider.provider_name}
+                      className="w-6 h-6 rounded"
+                      title={provider.provider_name}
+                    />
+                  ))}
+                  {movie.watchProviders.rent?.map((provider) => (
+                    <img
+                      key={provider.provider_id}
+                      src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                      alt={provider.provider_name}
+                      className="w-6 h-6 rounded opacity-70"
+                      title={`Rent on ${provider.provider_name}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </Card>
         

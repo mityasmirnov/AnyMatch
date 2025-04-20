@@ -15,9 +15,10 @@ DinoMatch is a mobile-first web application that combines collaborative group ma
 ## Technical Stack
 
 - **Frontend**: React with Next.js
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS with shadcn/ui components
 - **Backend**: Firebase (Authentication, Firestore)
-- **Movie Data**: Mock API (ready for TMDB API integration)
+- **Movie Data**: TMDB API (primary) and OMDB API (secondary)
+- **Authentication**: Email/password, Google, and Apple sign-in
 
 ## Project Structure
 
@@ -68,9 +69,11 @@ dinomatch/
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
+- Node.js (v18 or higher)
+- npm (v8 or higher)
 - Firebase account
+- TMDB API key and access token
+- OMDB API key
 
 ### Installation
 
@@ -80,11 +83,39 @@ dinomatch/
    cd dinomatch
    npm install
    ```
-3. Create a `.env` file based on `.env.example` and add your Firebase configuration
-4. Start the development server:
+3. Create a `.env.local` file with the following configuration:
+   ```bash
+   # Firebase Configuration
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+
+   # Movie APIs
+   NEXT_PUBLIC_TMDB_API_KEY=smth
+   NEXT_PUBLIC_TMDB_ACCESS_TOKEN=smth
+   NEXT_PUBLIC_OMDB_API_KEY=smth
+   ```
+
+4. Initialize Firebase:
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   firebase init
+   ```
+   Select:
+   - Firestore
+   - Authentication
+   - Hosting
+
+5. Start the development server:
    ```bash
    npm run dev
    ```
+
+6. Open http://localhost:3000 in your browser
 
 ## Deployment
 
@@ -93,25 +124,53 @@ See `hosting_instructions.md` for detailed deployment instructions for:
 - Vercel
 - Netlify
 
-## TMDB API Integration
+## Testing the Application
 
-The application currently uses a mock movie API service. To integrate with the real TMDB API:
+1. **Authentication Testing**:
+   - Create a new account using email/password
+   - Try signing in with Google
+   - Test Apple authentication if on iOS
+   - Verify email verification flow
 
-1. Register for a TMDB account at https://www.themoviedb.org/signup
-2. Request an API key from your account settings
-3. Add your API key to the `.env` file:
-   ```
-   REACT_APP_TMDB_API_KEY=your_api_key
-   ```
-4. Replace the mock API service with the real TMDB API client
+2. **Group Management**:
+   - Create a new group
+   - Copy and share the join code
+   - Join an existing group using a code
+   - Test group preferences
 
-## Future Enhancements
+3. **Movie Features**:
+   - Complete the genre survey
+   - Try the movie swipe interface
+   - Test filters (rating, genre, content type)
+   - Verify match notifications
 
-- Watchlist management
-- Viewing history tracking
-- Additional streaming platform information
+4. **API Integration**:
+   - The app uses OMDB API as primary source (1,000 daily limit)
+   - Automatically falls back to TMDB API when limit is reached
+
+## Features Status
+
+✅ Implemented:
+- Authentication (Email, Google, Apple)
+- Group Management with join codes
+- Genre Survey and Preferences
+- Movie Swipe Interface
+- Matching Algorithm
+- Content Filters (rating, genre, type)
+- Streaming Platform Information
+- Watch Provider Information
+- OMDB/TMDB API Integration
+- Mobile-First Responsive Design
+
+🔄 In Progress:
 - Enhanced recommendation algorithms
-- Support for larger groups with voting systems
+- Viewing history improvements
+- Group voting system refinements
+
+🔜 Planned:
+- Additional streaming platforms
+- Personalized recommendations
+- Social features and sharing
 
 ## License
 

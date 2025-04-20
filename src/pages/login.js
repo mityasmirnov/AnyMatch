@@ -1,5 +1,8 @@
+'use client';
+
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
@@ -140,6 +143,11 @@ export default function Login() {
               </svg>
             </button>
           </div>
+        </div>
+        <div className="text-sm text-center mt-4">
+          <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Don't have an account? Sign up
+          </Link>
         </div>
       </div>
     </div>
