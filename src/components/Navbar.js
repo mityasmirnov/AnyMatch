@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
-import Image from 'next/image';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -24,7 +23,7 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <Image src="/logo.png" alt="DinoMatch logo" width={32} height={32} className="rounded-lg mr-2" />
+              <img src="/assets/logo.svg" alt="DinoMatch logo" className="h-8 w-8 rounded-lg mr-2" />
               <span className="text-xl font-bold text-gray-900 dark:text-gray-100">DinoMatch</span>
             </Link>
             {user && (
