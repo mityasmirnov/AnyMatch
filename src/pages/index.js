@@ -1,13 +1,30 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
-  const router = useRouter()
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    // Redirect to dashboard or auth page depending on auth status
-    router.push('/DashboardPage')
-  }, [])
+    if (!loading) {
+      if (user) {
+        router.push('/dashboard');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [user, loading, router]);
 
-  return null // or a loading spinner if you prefer
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-600 to-indigo-700">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  // This will briefly show before redirect
+  return null;
 }
