@@ -31,28 +31,25 @@ const fetchTMDBMovies = async (page = 1) => {
 
 const fetchOMDBDetails = async (imdbId) => {
   try {
-    // Check if we've hit the daily limit
+    // Daily limit check
     const counter = await getOMDBCounter();
-    if (counter >= OMDB_DAILY_LIMIT) {
-      throw new Error('OMDB daily limit reached');
+    if (counter >= OMDB_DAILY_LIMIT) throw new Error('OMDB daily limit reached');
+    const response = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
+    if (!response.ok) {
+      console.error('OMDB HTTP error:', response.status, response.statusText);
+      return {};
     }
-
-    const response = await fetch(
-      `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`
-    );
-    if (!response.ok) throw new Error('OMDB API error');
     const data = await response.json();
-    
     if (data.Response === 'True') {
-      // Increment the counter only for successful requests
       await incrementOMDBCounter();
       return data;
-    } else {
-      throw new Error(data.Error || 'OMDB API error');
     }
+    console.warn('OMDB API returned error:', data.Error);
+    return {};
   } catch (error) {
+    if (error.message === 'OMDB daily limit reached') throw error;
     console.error('Error fetching OMDB details:', error);
-    throw error;
+    return {};
   }
 };
 
@@ -105,18 +102,18 @@ export const getMovieDetails = async (movieId) => {
       genres: tmdbData.genres,
       runtime: tmdbData.runtime,
       voteAverage: tmdbData.vote_average,
-      imdbRating: omdbData.imdbRating || (tmdbData.vote_average / 2).toFixed(1),
-      rottenTomatoesRating: omdbData.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value,
-      metascoreRating: omdbData.Metascore,
-      director: omdbData.Director || tmdbData.credits?.crew?.find(c => c.job === 'Director')?.name,
-      writer: omdbData.Writer,
-      cast: omdbData.Actors?.split(', ') || tmdbData.credits?.cast?.slice(0, 5).map(actor => actor.name) || [],
-      plot: omdbData.Plot || tmdbData.overview,
-      rated: omdbData.Rated,
-      awards: omdbData.Awards,
-      boxOffice: omdbData.BoxOffice,
-      trailer: tmdbData.videos?.results?.find(v => v.type === 'Trailer')?.key,
-      watchProviders: tmdbData['watch/providers']?.results?.US || null,
+      imdbRating: omdbData.imdbRating ?? ((tmdbData.vote_average / 2).toFixed(1)),
+      rottenTomatoesRating: omdbData.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value ?? null,
+      metascoreRating: omdbData.Metascore ?? null,
+      director: omdbData.Director ?? tmdbData.credits?.crew?.find(c => c.job === 'Director')?.name ?? null,
+      writer: omdbData.Writer ?? null,
+      cast: omdbData.Actors?.split(', ') ?? (tmdbData.credits?.cast?.slice(0, 5).map(actor => actor.name) || []),
+      plot: omdbData.Plot ?? tmdbData.overview,
+      rated: omdbData.Rated ?? null,
+      awards: omdbData.Awards ?? null,
+      boxOffice: omdbData.BoxOffice ?? null,
+      trailer: tmdbData.videos?.results?.find(v => v.type === 'Trailer')?.key ?? null,
+      watchProviders: tmdbData['watch/providers']?.results?.US ?? null,
     };
 
     // Cache the details
