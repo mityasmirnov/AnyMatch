@@ -7,7 +7,7 @@
  */
 
 // API configuration
-const OMDB_API_KEY = 'ca037129';
+const OMDB_API_KEY = process.env.NEXT_PUBLIC_OMDB_API_KEY;
 const OMDB_BASE_URL = 'https://www.omdbapi.com/'; // Changed from http to https
 
 // Track API usage to know when to switch to TMDB
