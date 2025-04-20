@@ -4,22 +4,25 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { SwipeCard } from '../components/SwipeCard';
-import { GroupManagement } from '../components/GroupManagement';
 import { getMoviesToSwipe } from '../services/movieService';
 import { 
-  createGroup, 
-  joinGroup, 
-  leaveGroup, 
   getUserGroups,
   addMoviePreference,
+  addToUserWatchlist,
+  getUserWatchlist,
   getGroupMatches
 } from '../services/firestore';
 import { useToast } from '../components/ui/toast-provider';
+import Link from 'next/link';
+import { Button } from '../components/ui/button';
+import { Select } from '../components/ui/select';
+import { useMovies } from '../contexts/MovieContext';
 
 export default function SwipePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { preferences } = useMovies();
   
   const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,24 +31,38 @@ export default function SwipePage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load initial movies
+  // Reset movies when filters or group change
+  useEffect(() => {
+    setMovies([]);
+    setCurrentPage(1);
+  }, [preferences, selectedGroup]);
+
+  // Load initial movies and apply filters
   useEffect(() => {
     const loadMovies = async () => {
       try {
+        setLoading(true);
         const newMovies = await getMoviesToSwipe(currentPage);
-        setMovies(prev => [...prev, ...newMovies]);
-        setLoading(false);
+        const prefs = selectedGroup?.preferences || preferences;
+        const filtered = newMovies.filter(movie => {
+          const meetsRating = movie.rating >= (prefs.minRating || 0);
+          const meetsGenre = !prefs.genres?.length || prefs.genres.includes(movie.genre);
+          return meetsRating && meetsGenre;
+        });
+        setMovies(prev => [...prev, ...filtered]);
       } catch (error) {
         toast({
           title: 'Error',
           description: 'Failed to load movies',
           variant: 'error'
         });
+      } finally {
+        setLoading(false);
       }
     };
 
     loadMovies();
-  }, [currentPage]);
+  }, [currentPage, preferences, selectedGroup]);
 
   // Load user's groups
   useEffect(() => {
@@ -86,106 +103,63 @@ export default function SwipePage() {
   }, [selectedGroup]);
 
   const handleSwipe = async (direction) => {
-    if (!selectedGroup) {
-      toast({
-        title: 'Select a Group',
-        description: 'Please select a group before swiping',
-        variant: 'warning'
-      });
-      return;
-    }
-
     const currentMovie = movies[0];
-    
     try {
-      // Record preference
-      await addMoviePreference(user.uid, currentMovie.id, direction);
-      
-      // Remove swiped movie
+      if (!selectedGroup) {
+        if (direction === 'right') {
+          await addToUserWatchlist(user.uid, currentMovie.id);
+          toast({
+            title: 'Added to Watchlist',
+            description: currentMovie.title,
+            variant: 'success'
+          });
+        }
+      } else {
+        await addMoviePreference(user.uid, currentMovie.id, direction);
+        const updatedMatches = await getGroupMatches(selectedGroup);
+        if (updatedMatches.length > matches.length) {
+          toast({
+            title: 'New Match!',
+            description: `You matched on "${currentMovie.title}"`,
+            variant: 'success'
+          });
+        }
+        setMatches(updatedMatches);
+      }
+      // Remove and load next
       setMovies(prev => prev.slice(1));
-      
-      // Load more movies if needed
-      if (movies.length < 5) {
-        setCurrentPage(prev => prev + 1);
-      }
+      if (movies.length < 5) setCurrentPage(prev => prev + 1);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: selectedGroup ? 'Failed to record preference' : 'Failed to add to watchlist',
+        variant: 'error'
+      });
+    }
+  };
 
-      // Check for new matches
+  const handleSyncLikes = async () => {
+    try {
+      const ids = await getUserWatchlist(user.uid);
+      for (const id of ids) {
+        await addMoviePreference(user.uid, id, 'right');
+      }
       const updatedMatches = await getGroupMatches(selectedGroup);
-      if (updatedMatches.length > matches.length) {
-        const newMatch = updatedMatches.find(m => !matches.includes(m));
-        toast({
-          title: 'New Match!',
-          description: `You matched on "${currentMovie.title}"`,
-          variant: 'success'
-        });
-      }
       setMatches(updatedMatches);
+      toast({ title: 'Synced likes', description: 'Your likes have been synced to this group', variant: 'success' });
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to record preference',
-        variant: 'error'
-      });
+      toast({ title: 'Error', description: 'Failed to sync likes', variant: 'error' });
     }
   };
 
-  const handleCreateGroup = async (name) => {
-    try {
-      await createGroup(user.uid, name);
-      const updatedGroups = await getUserGroups(user.uid);
-      setGroups(updatedGroups);
-      toast({
-        title: 'Success',
-        description: 'Group created successfully',
-        variant: 'success'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create group',
-        variant: 'error'
-      });
-    }
-  };
-
-  const handleJoinGroup = async (code) => {
-    try {
-      await joinGroup(user.uid, code);
-      const updatedGroups = await getUserGroups(user.uid);
-      setGroups(updatedGroups);
-      toast({
-        title: 'Success',
-        description: 'Joined group successfully',
-        variant: 'success'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'error'
-      });
-    }
-  };
-
-  const handleLeaveGroup = async (groupId) => {
-    try {
-      await leaveGroup(user.uid, groupId);
-      const updatedGroups = await getUserGroups(user.uid);
-      setGroups(updatedGroups);
-      if (selectedGroup === groupId) {
-        setSelectedGroup(null);
-      }
-      toast({
-        title: 'Success',
-        description: 'Left group successfully',
-        variant: 'success'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to leave group',
-        variant: 'error'
-      });
+  // Handle switching between personal and group modes
+  const handleModeChange = (e) => {
+    const val = e.target.value;
+    if (val === 'personal') {
+      setSelectedGroup(null);
+    } else {
+      const grp = groups.find(g => g.id === val);
+      setSelectedGroup(grp);
     }
   };
 
@@ -202,39 +176,44 @@ export default function SwipePage() {
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <GroupManagement
-          groups={groups}
-          onCreateGroup={handleCreateGroup}
-          onJoinGroup={handleJoinGroup}
-          onLeaveGroup={handleLeaveGroup}
-          onSelectGroup={setSelectedGroup}
-          className="mb-8"
-        />
+        <div className="flex justify-end gap-4 mb-4">
+          <Link href="/watchlist"><Button variant="outline">My Watchlist</Button></Link>
+          <Link href="/group-watchlist"><Button variant="outline" disabled={!selectedGroup}>Group Watchlist</Button></Link>
+        </div>
+        <div className="mb-4 flex items-center gap-2">
+          <label htmlFor="modeSelect" className="block text-sm font-medium text-gray-900 dark:text-gray-100">Mode:</label>
+          <Select
+            id="modeSelect"
+            value={selectedGroup?.id || 'personal'}
+            onChange={handleModeChange}
+            className="w-48"
+          >
+            <option value="personal">Personal</option>
+            {groups.map(g => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </Select>
+        </div>
         
-        {selectedGroup ? (
-          loading ? (
-            <div className="flex justify-center items-center h-[500px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-            </div>
-          ) : movies.length > 0 ? (
-            <SwipeCard
-              movie={movies[0]}
-              onSwipe={handleSwipe}
-            />
-          ) : (
-            <div className="text-center py-8">
-              <h3 className="text-xl font-medium text-gray-900">No More Movies</h3>
-              <p className="mt-2 text-gray-500">Check back later for more movies to swipe!</p>
-            </div>
-          )
+        {selectedGroup && (
+          <div className="flex justify-center mb-4">
+            <Button variant="secondary" onClick={handleSyncLikes}>Sync My Likes</Button>
+          </div>
+        )}
+        {loading ? (
+          <div className="flex justify-center items-center h-[500px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+          </div>
+        ) : movies.length > 0 ? (
+          <SwipeCard movie={movies[0]} onSwipe={handleSwipe} />
         ) : (
           <div className="text-center py-8">
-            <h3 className="text-xl font-medium text-gray-900">Select a Group</h3>
-            <p className="mt-2 text-gray-500">Choose a group to start swiping!</p>
+            <h3 className="text-xl font-medium text-gray-900">No More Movies</h3>
+            <p className="mt-2 text-gray-500">Check back later for more movies to swipe!</p>
           </div>
         )}
 
-        {matches.length > 0 && (
+        {selectedGroup && matches.length > 0 && (
           <div className="mt-8">
             <h3 className="text-xl font-medium mb-4">Group Matches</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

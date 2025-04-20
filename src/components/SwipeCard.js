@@ -97,7 +97,7 @@ const SwipeCard = ({
             style={{ backgroundImage: `url(${movie.coverUrl})` }}
           />
           <div className="p-4">
-            <h3 className="text-xl font-bold">{movie.title}</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{movie.title}</h3>
             <div className="flex items-center mt-1 text-sm">
               <span className="text-gray-600">
                 {movie.releaseDate?.split('-')[0]}

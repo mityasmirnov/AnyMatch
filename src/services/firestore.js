@@ -120,32 +120,65 @@ export const addMoviePreference = async (userId, movieId, preference) => {
   }
 };
 
+// Personal Watchlist: add and get functions
+export const addToUserWatchlist = async (userId, movieId) => {
+  try {
+    const ref = doc(db, 'userWatchlist', userId);
+    await setDoc(ref, {
+      movies: arrayUnion(movieId),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error adding to user watchlist:', error);
+    throw error;
+  }
+};
+
+export const getUserWatchlist = async (userId) => {
+  try {
+    const snap = await getDoc(doc(db, 'userWatchlist', userId));
+    return snap.exists() ? snap.data().movies || [] : [];
+  } catch (error) {
+    console.error('Error getting user watchlist:', error);
+    return [];
+  }
+};
+
+// Group Watchlist
+export const getGroupWatchlist = async (groupId) => {
+  try {
+    const snap = await getDoc(doc(db, 'groups', groupId));
+    return snap.exists() ? snap.data().watchlist || [] : [];
+  } catch (error) {
+    console.error('Error getting group watchlist:', error);
+    return [];
+  }
+};
+
 export const getGroupMatches = async (groupId) => {
   try {
     const groupDoc = await getDoc(doc(db, 'groups', groupId));
     const members = groupDoc.data().members;
-    
-    // Get all members' preferences
     const preferencesPromises = members.map(async (userId) => {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      return userDoc.data().moviePreferences || {};
+      const d = await getDoc(doc(db, 'users', userId));
+      return d.data().moviePreferences || {};
     });
-    
     const allPreferences = await Promise.all(preferencesPromises);
-    
-    // Find movies that all members liked
-    const matches = {};
-    allPreferences.forEach((userPrefs) => {
-      Object.entries(userPrefs).forEach(([movieId, pref]) => {
-        if (pref === 'right') {
-          matches[movieId] = (matches[movieId] || 0) + 1;
-        }
+    const counts = {};
+    allPreferences.forEach(userPrefs => {
+      Object.entries(userPrefs).forEach(([id, pref]) => {
+        if (pref === 'right') counts[id] = (counts[id] || 0) + 1;
       });
     });
-    
-    return Object.entries(matches)
-      .filter(([_, count]) => count === members.length)
-      .map(([movieId]) => movieId);
+    const matchIds = Object.entries(counts)
+      .filter(([, c]) => c === members.length)
+      .map(([id]) => id);
+    // Persist
+    await updateDoc(doc(db, 'groups', groupId), {
+      watchlist: matchIds,
+      updatedAt: serverTimestamp()
+    });
+    return matchIds;
   } catch (error) {
     console.error('Error getting group matches:', error);
     throw error;
@@ -155,7 +188,7 @@ export const getGroupMatches = async (groupId) => {
 // Movie Cache
 export const cacheMovieDetails = async (movieId, details) => {
   try {
-    await setDoc(doc(db, 'movies', movieId), {
+    await setDoc(doc(db, 'movies', String(movieId)), {
       ...details,
       cachedAt: serverTimestamp(),
     });
@@ -167,7 +200,7 @@ export const cacheMovieDetails = async (movieId, details) => {
 
 export const getCachedMovie = async (movieId) => {
   try {
-    const movieDoc = await getDoc(doc(db, 'movies', movieId));
+    const movieDoc = await getDoc(doc(db, 'movies', String(movieId)));
     if (movieDoc.exists()) {
       return movieDoc.data();
     }

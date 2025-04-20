@@ -7,7 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
-  OAuthProvider
+  OAuthProvider,
+  deleteUser
 } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '../components/ui/toast-provider';
@@ -234,6 +235,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Delete account
+  const deleteAccount = async () => {
+    try {
+      if (!auth.currentUser) throw new Error('No user is signed in');
+      await deleteUser(auth.currentUser);
+      await signOut(auth);
+      setUser(null);
+      toast({ title: 'Account deleted', description: 'Your account has been deleted.', variant: 'success' });
+    } catch (error) {
+      toast({ title: 'Delete account failed', description: error.message, variant: 'error' });
+      throw error;
+    }
+  };
+
   // Context value
   const value = {
     user,
@@ -243,7 +258,8 @@ export const AuthProvider = ({ children }) => {
     signInWithGoogle,
     signInWithApple,
     signOut: signOutUser,
-    updateUserProfile
+    updateUserProfile,
+    deleteAccount
   };
 
   return (

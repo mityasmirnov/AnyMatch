@@ -38,7 +38,7 @@ const GroupManagement = ({
           <div className="flex border-b mt-4">
             <button
               className={`flex-1 py-2 text-center ${
-                activeTab === 'myGroups' ? 'border-b-2 border-primary-500 text-primary-600 font-medium' : 'text-gray-500'
+                activeTab === 'myGroups' ? 'border-b-2 border-primary-500 text-primary-600 font-medium' : 'text-gray-500 dark:text-gray-400'
               }`}
               onClick={() => setActiveTab('myGroups')}
             >
@@ -46,7 +46,7 @@ const GroupManagement = ({
             </button>
             <button
               className={`flex-1 py-2 text-center ${
-                activeTab === 'join' ? 'border-b-2 border-primary-500 text-primary-600 font-medium' : 'text-gray-500'
+                activeTab === 'join' ? 'border-b-2 border-primary-500 text-primary-600 font-medium' : 'text-gray-500 dark:text-gray-400'
               }`}
               onClick={() => setActiveTab('join')}
             >
@@ -82,16 +82,16 @@ const GroupManagement = ({
                   {groups.map((group) => (
                     <div
                       key={group.id}
-                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      className="border rounded-lg p-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium">{group.name}</h4>
-                          <p className="text-sm text-gray-500">
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100">{group.name}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
                             {group.members.length} {group.members.length === 1 ? 'member' : 'members'}
                           </p>
                           {group.joinCode && (
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                               Join code: <span className="font-mono font-medium">{group.joinCode}</span>
                             </p>
                           )}

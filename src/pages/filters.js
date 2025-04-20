@@ -58,12 +58,14 @@ export default function FiltersPage() {
     try {
       // Update personal preferences
       await updatePreferences({
-        contentType
+        contentType,
+        minRating,
+        genres: selectedGenres
       });
 
-      // Update group preferences
+      // Update group preferences if in a group
       if (currentGroup) {
-        await updateGroupPreferences({
+        await updateGroupPreferences(currentGroup.id, {
           genres: selectedGenres,
           minRating
         });
@@ -75,7 +77,7 @@ export default function FiltersPage() {
     }
   };
 
-  if (!user || !currentGroup) return null;
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">

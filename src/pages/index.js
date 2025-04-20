@@ -9,7 +9,7 @@ export default function Home() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        router.push('/dashboard');
+        router.push('/swipe');
       } else {
         router.push('/login');
       }
