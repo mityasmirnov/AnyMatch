@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
+import Image from 'next/image';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -23,6 +24,7 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex-shrink-0 flex items-center">
+              <Image src="/logo.png" alt="DinoMatch logo" width={32} height={32} className="rounded-lg mr-2" />
               <span className="text-xl font-bold text-gray-900 dark:text-gray-100">DinoMatch</span>
             </Link>
             {user && (
@@ -56,16 +58,6 @@ export const Navbar = () => {
                   }`}
                 >
                   Groups
-                </Link>
-                <Link
-                  href="/matches"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    router.pathname === '/matches'
-                      ? 'border-primary-500 text-gray-900 dark:text-gray-100'
-                      : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
-                  }`}
-                >
-                  Matches
                 </Link>
                 <Link
                   href="/profile"

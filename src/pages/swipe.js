@@ -174,7 +174,7 @@ export default function SwipePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-indigo-700 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-end gap-4 mb-4">
           <Link href="/watchlist"><Button variant="outline">My Watchlist</Button></Link>

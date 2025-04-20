@@ -82,7 +82,7 @@ export default function GroupsPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-indigo-700 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Groups</h1>
         <div className="flex gap-4 mb-6">
@@ -124,6 +124,7 @@ export default function GroupsPage() {
                   </p>
                   <div className="flex gap-2 mt-4">
                     <Button onClick={() => handleSelect(g.id)}>Select</Button>
+                    <Button variant="outline" onClick={() => router.push(`/matches?group=${g.id}`)}>Matches</Button>
                     <Button variant="destructive" onClick={() => handleLeave(g.id)}>Remove</Button>
                   </div>
                 </CardContent>

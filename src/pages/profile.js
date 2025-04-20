@@ -58,9 +58,9 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-indigo-700 py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
-        <h1 className="text-2xl font-bold">Profile</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Profile</h1>
 
         <Card>
           <CardHeader>

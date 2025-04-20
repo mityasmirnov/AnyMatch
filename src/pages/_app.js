@@ -12,7 +12,7 @@ export default function App({ Component, pageProps }) {
       <AuthProvider>
         <GroupProvider>
           <MovieProvider>
-            <div className="min-h-screen flex flex-col">
+            <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-600 to-indigo-700">
               <Navbar />
               <main className="flex-1">
                 <Component {...pageProps} />

@@ -3,11 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserWatchlist } from '../services/firestore';
+import { getUserWatchlist, getUserGroups, getGroupMatches } from '../services/firestore';
 import { getMovieDetails } from '../services/movieService';
 import Link from 'next/link';
 import { useToast } from '../components/ui/toast-provider';
 import { Button } from '../components/ui/button';
+import { Select } from '../components/ui/select';
 
 export default function WatchlistPage() {
   const { user, loading: authLoading } = useAuth();
@@ -16,6 +17,8 @@ export default function WatchlistPage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   // Track watched movies
   const handleMarkWatched = useCallback((id) => {
@@ -28,6 +31,30 @@ export default function WatchlistPage() {
     });
   }, []);
 
+  // Load user groups for dropdown
+  useEffect(() => {
+    if (!user) return;
+    const loadGroups = async () => {
+      try {
+        const userGroups = await getUserGroups(user.uid);
+        setGroups(userGroups);
+      } catch (err) {
+        console.error('Error loading groups:', err);
+      }
+    };
+    loadGroups();
+  }, [user]);
+
+  // Switch modes between personal and group watchlists
+  const handleModeChange = (e) => {
+    if (e.target.value === 'personal') {
+      setSelectedGroup(null);
+    } else {
+      const grp = groups.find(g => g.id === e.target.value);
+      setSelectedGroup(grp);
+    }
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -38,9 +65,14 @@ export default function WatchlistPage() {
     (async () => {
       setLoading(true);
       try {
-        const ids = await getUserWatchlist(user.uid);
+        let ids;
+        if (!selectedGroup) {
+          ids = await getUserWatchlist(user.uid);
+        } else {
+          ids = await getGroupMatches(selectedGroup.id);
+        }
         const details = await Promise.all(ids.map(id => getMovieDetails(id)));
-        setMovies(details.map(d => ({ ...d, watched: false })));
+        setMovies(details.map(d => ({ ...d, watched: false })));  
       } catch (e) {
         console.error('Watchlist load failed:', e);
         setError(e);
@@ -48,7 +80,7 @@ export default function WatchlistPage() {
         setLoading(false);
       }
     })();
-  }, [user, authLoading]);
+  }, [user, authLoading, selectedGroup]);
 
   if (authLoading || loading) return (
     <div className="flex justify-center items-center h-screen">
@@ -65,9 +97,18 @@ export default function WatchlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-purple-600 to-indigo-700 py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">My Watchlist</h1>
+        <h1 className="text-2xl font-bold mb-4">{!selectedGroup ? 'My Watchlist' : `${selectedGroup.name} Matches`}</h1>
+        <div className="mb-4 flex items-center gap-2">
+          <label htmlFor="modeSelect" className="block text-sm font-medium text-gray-900 dark:text-gray-100">Mode:</label>
+          <Select id="modeSelect" value={selectedGroup?.id || 'personal'} onChange={handleModeChange} className="w-48">
+            <option value="personal">Personal</option>
+            {groups.map(g => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </Select>
+        </div>
         {movies.length === 0 ? (
           <p className="text-center text-gray-500">No movies in your watchlist.</p>
         ) : (
