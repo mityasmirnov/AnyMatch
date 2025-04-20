@@ -1,6 +1,5 @@
 Features and corrections to implement
 - Add ratings to the watch list - like stars under the tile (1-5)
-- Add minimum raiting for the swipe page
 - When pressing at tile at swipe mode it should show full movie description, director, actors 
 - Implement recommendation system: personal and for groups, include similarities
 - store preferences
