@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>DinoMatch Logo</title>
+    <g id="DinoMatch-Logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="Background" fill="#22C55E" cx="100" cy="100" r="100"></circle>
+        <g id="Dinosaur" transform="translate(30.000000, 40.000000)" fill="#FFFFFF">
+            <!-- Dinosaur Body -->
+            <path d="M140,70 C140,70 130,85 125,90 C120,95 110,100 100,100 C90,100 80,95 75,90 C70,85 60,70 60,70 L50,80 C50,80 45,85 40,85 C35,85 30,80 30,80 L20,70 L10,80 L0,70 L10,60 L0,50 L10,40 L0,30 L10,20 L20,30 L30,20 L40,30 L50,20 L60,30 L70,20 L80,30 L90,20 L100,30 L110,20 L120,30 L130,20 L140,30 L130,40 L140,50 L130,60 L140,70 Z" id="Body"></path>
+            
+            <!-- Dinosaur Eye -->
+            <circle id="Eye" fill="#22C55E" cx="110" cy="50" r="5"></circle>
+            
+            <!-- Dinosaur Spikes -->
+            <path d="M60,20 L65,10 L70,20 L75,10 L80,20 L85,10 L90,20 L95,10 L100,20 L105,10 L110,20 L115,10 L120,20 L125,10 L130,20" id="Spikes"></path>
+            
+            <!-- Heart -->
+            <path d="M30,60 C30,55 35,50 40,50 C45,50 50,55 50,60 C50,55 55,50 60,50 C65,50 70,55 70,60 C70,65 65,70 60,75 L50,85 L40,75 C35,70 30,65 30,60 Z" id="Heart" fill="#F97316"></path>
+        </g>
+    </g>
+</svg>

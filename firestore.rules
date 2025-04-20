@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "groups": {
+      "$groupId": {
+        ".read": "root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
+        ".write": "root.child('groups').child($groupId).child('members').child(auth.uid).child('role').val() === 'owner'"
+      }
+    },
+    "swipes": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "matches": {
+      "$groupId": {
+        ".read": "root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
+        ".write": "root.child('groups').child($groupId).child('members').child(auth.uid).exists()"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "dinomatch",
+  "version": "1.0.0",
+  "description": "A mobile-first web app for collaborative movie selection with Tinder-style swiping",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next build && next export",
+    "lint": "next lint"
+  },
+  "keywords": [
+    "movies",
+    "tinder",
+    "swipe",
+    "collaborative",
+    "firebase",
+    "nextjs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
