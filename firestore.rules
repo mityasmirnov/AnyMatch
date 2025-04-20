@@ -1,28 +1,36 @@
-{
-  "rules": {
-    "users": {
-      "$uid": {
-        ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid"
-      }
-    },
-    "groups": {
-      "$groupId": {
-        ".read": "root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
-        ".write": "root.child('groups').child($groupId).child('members').child(auth.uid).child('role').val() === 'owner'"
-      }
-    },
-    "swipes": {
-      "$uid": {
-        ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid"
-      }
-    },
-    "matches": {
-      "$groupId": {
-        ".read": "root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
-        ".write": "root.child('groups').child($groupId).child('members').child(auth.uid).exists()"
-      }
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User profiles: only the user can read/write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Groups: any authenticated user can create/read; only members can update/delete
+    match /groups/{groupId} {
+      allow create, read: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid in resource.data.members;
+    }
+
+    // Swipes: only the user can read/write their own swipes
+    match /swipes/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Matches: only group members can read/write
+    match /matches/{groupId} {
+      allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+    }
+
+    // OMDB counters: only authenticated users
+    match /counters/{counterId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Cached movies: public read, no writes
+    match /movies/{movieId} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

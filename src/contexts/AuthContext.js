@@ -6,8 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   OAuthProvider
 } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
@@ -126,40 +125,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Handle redirect result
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          const provider = result.providerId;
-          toast({
-            title: `Signed in with ${provider === 'apple.com' ? 'Apple' : 'Google'}`,
-            description: "You have successfully signed in.",
-            variant: "success"
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "error"
-        });
-      }
-    };
 
-    handleRedirectResult();
-  }, [auth]);
 
   // Sign in with Google
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithRedirect(auth, provider);
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        toast({
+          title: "Signed in with Google",
+          description: "You have successfully signed in.",
+          variant: "success"
+        });
+      }
     } catch (error) {
+      let errorMessage = error.message;
+      if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = 'This domain is not authorized for authentication. Please make sure localhost is added to authorized domains in Firebase Console.';
+      }
       toast({
         title: "Google sign in failed",
-        description: error.message,
+        description: errorMessage,
         variant: "error"
       });
       throw error;
@@ -172,7 +162,14 @@ export const AuthProvider = ({ children }) => {
       const provider = new OAuthProvider('apple.com');
       provider.addScope('email');
       provider.addScope('name');
-      await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        toast({
+          title: "Signed in with Apple",
+          description: "You have successfully signed in.",
+          variant: "success"
+        });
+      }
     } catch (error) {
       toast({
         title: "Apple sign in failed",

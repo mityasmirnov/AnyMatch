@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,7 +17,7 @@ import {
 import { useToast } from '../components/ui/toast-provider';
 
 export default function SwipePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   
@@ -187,8 +189,13 @@ export default function SwipePage() {
     }
   };
 
-  if (!user) {
-    router.push('/login');
+  useEffect(() => {
+    if (!user && !authLoading) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  if (!user || authLoading) {
     return null;
   }
 
