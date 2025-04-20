@@ -94,7 +94,7 @@ const SwipeCard = ({
         <Card className="h-[500px] overflow-hidden">
           <div 
             className="h-[350px] bg-cover bg-center"
-            style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w500${movie.posterPath})` }}
+            style={{ backgroundImage: `url(${movie.coverUrl})` }}
           />
           <div className="p-4">
             <h3 className="text-xl font-bold">{movie.title}</h3>
@@ -103,10 +103,10 @@ const SwipeCard = ({
                 {movie.releaseDate?.split('-')[0]}
               </span>
               <span className="ml-auto bg-primary-100 text-primary-800 px-2 py-0.5 rounded-full">
-                ★ {movie.voteAverage.toFixed(1)}
+                ★ {movie.rating.toFixed(1)}
               </span>
             </div>
-            <p className="mt-2 text-sm text-gray-600 line-clamp-2">{movie.overview}</p>
+            <p className="mt-2 text-sm text-gray-600 line-clamp-2">{movie.description}</p>
             
             {/* Watch providers */}
             {movie.watchProviders && (
