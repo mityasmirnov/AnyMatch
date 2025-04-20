@@ -120,6 +120,18 @@ export const addMoviePreference = async (userId, movieId, preference) => {
   }
 };
 
+// Get IDs of movies user has already swiped (liked/disliked)
+export const getUserMoviePreferences = async (userId) => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    const prefs = userDoc.exists() ? (userDoc.data().moviePreferences || {}) : {};
+    return Object.keys(prefs);
+  } catch (error) {
+    console.error('Error getting user movie preferences:', error);
+    return [];
+  }
+};
+
 // Personal Watchlist: add and get functions
 export const addToUserWatchlist = async (userId, movieId) => {
   try {
@@ -155,9 +167,11 @@ export const getGroupWatchlist = async (groupId) => {
   }
 };
 
-export const getGroupMatches = async (groupId) => {
+export const getGroupMatches = async (groupIdOrObj) => {
   try {
-    const groupDoc = await getDoc(doc(db, 'groups', groupId));
+    // Normalize parameter to ID string
+    const groupId = typeof groupIdOrObj === 'object' && groupIdOrObj.id ? groupIdOrObj.id : groupIdOrObj;
+    const groupDoc = await getDoc(doc(db, 'groups', String(groupId)));
     const members = groupDoc.data().members;
     const preferencesPromises = members.map(async (userId) => {
       const d = await getDoc(doc(db, 'users', userId));

@@ -1,0 +1,17 @@
+Features and corrections to implement
+- Add ratings to the watch list - like stars under the tile (1-5)
+- Add minimum raiting for the swipe page
+- When pressing at tile at swipe mode it should show full movie description, director, actors 
+- Implement recommendation system: personal and for groups, include similarities
+- store preferences
+- Swiping on actors, directors
+- Add filter at swipe mode by relevance, by year 
+- Add tv series
+- add sources where to watch (depending on region): 
+    - Add watch providers
+    - Add streaming platforms: netflix, hulu, amazon, apple, youtube, etc
+- Add streaming platform availability for user- select what platforms are available for user 
+- X
+
+optional: 
+- set up custom database for movies to store everything

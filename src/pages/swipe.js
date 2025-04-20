@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { SwipeCard } from '../components/SwipeCard';
@@ -10,7 +10,8 @@ import {
   addMoviePreference,
   addToUserWatchlist,
   getUserWatchlist,
-  getGroupMatches
+  getGroupMatches,
+  getUserMoviePreferences
 } from '../services/firestore';
 import { useToast } from '../components/ui/toast-provider';
 import Link from 'next/link';
@@ -30,39 +31,50 @@ export default function SwipePage() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const seenIdsRef = useRef(new Set());
 
-  // Reset movies when filters or group change
+  // Reset on filter/group/user change
   useEffect(() => {
+    if (!user) return;
+    seenIdsRef.current.clear();
     setMovies([]);
     setCurrentPage(1);
-  }, [preferences, selectedGroup]);
+  }, [preferences, selectedGroup, user]);
 
   // Load initial movies and apply filters
   useEffect(() => {
+    if (!user) return;
     const loadMovies = async () => {
       try {
         setLoading(true);
+        // Exclude swiped, watchlisted, and previously shown in this session
+        const swipedIds = await getUserMoviePreferences(user.uid);
+        const watchlistIds = await getUserWatchlist(user.uid);
+        const excludeIds = new Set([
+          ...swipedIds,
+          ...watchlistIds,
+          ...seenIdsRef.current
+        ]);
         const newMovies = await getMoviesToSwipe(currentPage);
         const prefs = selectedGroup?.preferences || preferences;
         const filtered = newMovies.filter(movie => {
           const meetsRating = movie.rating >= (prefs.minRating || 0);
           const meetsGenre = !prefs.genres?.length || prefs.genres.includes(movie.genre);
-          return meetsRating && meetsGenre;
+          return meetsRating && meetsGenre && !excludeIds.has(String(movie.id));
         });
         setMovies(prev => [...prev, ...filtered]);
+        // Mark these as seen
+        filtered.forEach(m => seenIdsRef.current.add(String(m.id)));
       } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to load movies',
-          variant: 'error'
-        });
+        console.error('Error loading swipe movies:', error);
+        toast({ title: 'Error', description: `Failed to load movies: ${error.message}`, variant: 'error' });
       } finally {
         setLoading(false);
       }
     };
 
     loadMovies();
-  }, [currentPage, preferences, selectedGroup]);
+  }, [user, currentPage, preferences, selectedGroup]);
 
   // Load user's groups
   useEffect(() => {
@@ -88,7 +100,8 @@ export default function SwipePage() {
     const loadMatches = async () => {
       if (!selectedGroup) return;
       try {
-        const groupMatches = await getGroupMatches(selectedGroup);
+        // Pass group ID string
+        const groupMatches = await getGroupMatches(selectedGroup.id);
         setMatches(groupMatches);
       } catch (error) {
         toast({
@@ -106,6 +119,8 @@ export default function SwipePage() {
     const currentMovie = movies[0];
     try {
       if (!selectedGroup) {
+        // Persist personal swipe (like/dislike)
+        await addMoviePreference(user.uid, currentMovie.id, direction);
         if (direction === 'right') {
           await addToUserWatchlist(user.uid, currentMovie.id);
           toast({
@@ -115,14 +130,11 @@ export default function SwipePage() {
           });
         }
       } else {
+        // Group swipe: record and refresh matches
         await addMoviePreference(user.uid, currentMovie.id, direction);
-        const updatedMatches = await getGroupMatches(selectedGroup);
+        const updatedMatches = await getGroupMatches(selectedGroup.id);
         if (updatedMatches.length > matches.length) {
-          toast({
-            title: 'New Match!',
-            description: `You matched on "${currentMovie.title}"`,
-            variant: 'success'
-          });
+          toast({ title: 'New Match!', description: `You matched on "${currentMovie.title}"`, variant: 'success' });
         }
         setMatches(updatedMatches);
       }
@@ -144,7 +156,8 @@ export default function SwipePage() {
       for (const id of ids) {
         await addMoviePreference(user.uid, id, 'right');
       }
-      const updatedMatches = await getGroupMatches(selectedGroup);
+      // Refresh with group ID
+      const updatedMatches = await getGroupMatches(selectedGroup.id);
       setMatches(updatedMatches);
       toast({ title: 'Synced likes', description: 'Your likes have been synced to this group', variant: 'success' });
     } catch (error) {

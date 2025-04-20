@@ -9,16 +9,14 @@ const OMDB_DAILY_LIMIT = 1000;
 const tmdbOptions = {
   method: 'GET',
   headers: {
-    accept: 'application/json',
-    Authorization: `Bearer ${TMDB_ACCESS_TOKEN}`
+    accept: 'application/json'
   }
 };
 
 const fetchTMDBMovies = async (page = 1) => {
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/discover/movie?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}`,
-      tmdbOptions
+      `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}`
     );
     if (!response.ok) throw new Error('TMDB API error');
     const data = await response.json();
@@ -56,8 +54,7 @@ const fetchOMDBDetails = async (imdbId) => {
 const fetchTMDBDetails = async (movieId) => {
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}?language=en-US&append_to_response=credits,videos,watch/providers`,
-      tmdbOptions
+      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=credits,videos,watch/providers`
     );
     if (!response.ok) throw new Error('TMDB API error');
     return await response.json();

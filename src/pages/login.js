@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -19,7 +17,7 @@ export default function Login() {
     try {
       setLoading(true);
       await signIn(email, password);
-      router.push('/dashboard');
+      router.push('/swipe');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -31,7 +29,7 @@ export default function Login() {
     try {
       setLoading(true);
       await signInWithGoogle();
-      router.push('/dashboard');
+      router.push('/swipe');
     } catch (error) {
       console.error('Google login error:', error);
     } finally {
@@ -43,7 +41,7 @@ export default function Login() {
     try {
       setLoading(true);
       await signInWithApple();
-      router.push('/dashboard');
+      router.push('/swipe');
     } catch (error) {
       console.error('Apple login error:', error);
     } finally {
