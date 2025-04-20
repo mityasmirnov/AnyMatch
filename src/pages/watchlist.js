@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserWatchlist, getUserGroups, getGroupMatches } from '../services/firestore';
+import { getUserWatchlist, getUserGroups, getGroupMatches, removeFromUserWatchlist } from '../services/firestore';
 import { getMovieDetails } from '../services/movieService';
 import Link from 'next/link';
 import { useToast } from '../components/ui/toast-provider';
@@ -120,11 +120,25 @@ export default function WatchlistPage() {
                     <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} className="w-full h-full object-cover" />
                   </div>
                 </Link>
-                <div className="mt-2">
+                {/* Star rating */}
+                <div className="mt-2 flex gap-1">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} className="text-yellow-400 text-lg">
+                      {i < Math.round(movie.voteAverage / 2) ? '★' : '☆'}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2">
                   {!movie.watched ? (
                     <Button size="sm" onClick={() => handleMarkWatched(movie.id)}>Watched</Button>
                   ) : (
                     <span className="text-sm text-gray-500">Watched</span>
+                  )}
+                  {!selectedGroup && (
+                    <Button size="sm" variant="destructive" onClick={async () => {
+                      await removeFromUserWatchlist(user.uid, movie.id);
+                      setMovies(prev => prev.filter(m => m.id !== movie.id));
+                    }}>Remove</Button>
                   )}
                 </div>
               </div>

@@ -11,7 +11,8 @@ Features and corrections to implement
     - Add watch providers
     - Add streaming platforms: netflix, hulu, amazon, apple, youtube, etc
 - Add streaming platform availability for user- select what platforms are available for user 
-- X
+- 
 
 optional: 
 - set up custom database for movies to store everything
+- implement extra entities to match on: restaurants, activites etc

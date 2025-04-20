@@ -23,7 +23,7 @@ export default function SwipePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { preferences } = useMovies();
+  const { preferences, updatePreferences } = useMovies();
   
   const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,6 +62,11 @@ export default function SwipePage() {
           const meetsGenre = !prefs.genres?.length || prefs.genres.includes(movie.genre);
           return meetsRating && meetsGenre && !excludeIds.has(String(movie.id));
         });
+        // If this page yields no cards but API returned results, fetch next page
+        if (filtered.length === 0 && newMovies.length > 0) {
+          setCurrentPage(prev => prev + 1);
+          return;
+        }
         setMovies(prev => [...prev, ...filtered]);
         // Mark these as seen
         filtered.forEach(m => seenIdsRef.current.add(String(m.id)));
@@ -121,7 +126,7 @@ export default function SwipePage() {
       if (!selectedGroup) {
         // Persist personal swipe (like/dislike)
         await addMoviePreference(user.uid, currentMovie.id, direction);
-        if (direction === 'right') {
+        if (direction === 'right' || direction === 'watch') {
           await addToUserWatchlist(user.uid, currentMovie.id);
           toast({
             title: 'Added to Watchlist',
@@ -186,6 +191,11 @@ export default function SwipePage() {
     return null;
   }
 
+  const [sliderValue, setSliderValue] = useState(preferences.minRating || 0);
+  useEffect(() => {
+    setSliderValue(preferences.minRating || 0);
+  }, [preferences.minRating]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-600 to-indigo-700 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -207,7 +217,23 @@ export default function SwipePage() {
             ))}
           </Select>
         </div>
-        
+        <div className="mb-4 flex flex-col">
+          <label htmlFor="minRating" className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+            Min Rating: {sliderValue}
+          </label>
+          <input
+            id="minRating"
+            type="range"
+            min="0"
+            max="10"
+            step="1"
+            value={sliderValue}
+            onChange={e => setSliderValue(parseInt(e.target.value))}
+            onMouseUp={() => updatePreferences({ minRating: sliderValue })}
+            onTouchEnd={() => updatePreferences({ minRating: sliderValue })}
+            className="w-full"
+          />
+        </div>
         {selectedGroup && (
           <div className="flex justify-center mb-4">
             <Button variant="secondary" onClick={handleSyncLikes}>Sync My Likes</Button>

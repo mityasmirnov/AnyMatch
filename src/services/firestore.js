@@ -132,6 +132,29 @@ export const getUserMoviePreferences = async (userId) => {
   }
 };
 
+// User-specific movie ratings
+export const addUserMovieRating = async (userId, movieId, rating) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      [`movieRatings.${movieId}`]: rating,
+    });
+  } catch (error) {
+    console.error('Error adding user movie rating:', error);
+    throw error;
+  }
+};
+
+export const getUserMovieRatings = async (userId) => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    return userDoc.exists() ? (userDoc.data().movieRatings || {}) : {};
+  } catch (error) {
+    console.error('Error getting user movie ratings:', error);
+    return {};
+  }
+};
+
 // Personal Watchlist: add and get functions
 export const addToUserWatchlist = async (userId, movieId) => {
   try {
@@ -142,6 +165,19 @@ export const addToUserWatchlist = async (userId, movieId) => {
     }, { merge: true });
   } catch (error) {
     console.error('Error adding to user watchlist:', error);
+    throw error;
+  }
+};
+
+export const removeFromUserWatchlist = async (userId, movieId) => {
+  try {
+    const ref = doc(db, 'userWatchlist', userId);
+    await updateDoc(ref, {
+      movies: arrayRemove(movieId),
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error removing from user watchlist:', error);
     throw error;
   }
 };

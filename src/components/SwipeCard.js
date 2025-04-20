@@ -156,15 +156,22 @@ const SwipeCard = ({
       
       {/* Button controls */}
       <div className="flex justify-center mt-6 gap-8">
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           className="rounded-full w-16 h-16 flex items-center justify-center text-2xl shadow-lg"
           onClick={() => onSwipe('left')}
         >
           ✕
         </Button>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="secondary"
+          className="rounded-full w-16 h-16 flex items-center justify-center text-2xl shadow-lg"
+          onClick={() => onSwipe('watch')}
+        >
+          👁
+        </Button>
+        <Button
+          variant="primary"
           className="rounded-full w-16 h-16 flex items-center justify-center text-2xl shadow-lg"
           onClick={() => onSwipe('right')}
         >
