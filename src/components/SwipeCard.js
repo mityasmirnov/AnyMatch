@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
+import { getMovieDetails } from '../services/movieService';
 
 const SwipeCard = ({ 
   movie, 
@@ -12,6 +13,9 @@ const SwipeCard = ({
   const [currentX, setCurrentX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const cardRef = useRef(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [details, setDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   // Reset position when movie changes
   useEffect(() => {
@@ -63,6 +67,23 @@ const SwipeCard = ({
     // Reset position with animation
     setCurrentX(0);
   };
+
+  const handleShowDetails = async () => {
+    if (!details) {
+      setDetailsLoading(true);
+      try {
+        const full = await getMovieDetails(movie.id);
+        setDetails(full);
+      } catch (e) {
+        console.error('Error loading details:', e);
+      } finally {
+        setDetailsLoading(false);
+      }
+    }
+    setShowDetails(true);
+  };
+
+  const handleCloseDetails = () => setShowDetails(false);
 
   // Calculate rotation based on swipe distance
   const rotation = currentX * 0.1; // 0.1 degree per pixel
@@ -177,7 +198,32 @@ const SwipeCard = ({
         >
           ♥
         </Button>
+        <Button
+          variant="secondary"
+          className="rounded-full w-16 h-16 flex items-center justify-center text-2xl shadow-lg"
+          onClick={handleShowDetails}
+        >
+          ℹ️
+        </Button>
       </div>
+      
+      {showDetails && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+          <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-w-lg w-full p-6 rounded shadow-lg overflow-auto max-h-[90vh] relative">
+            <button onClick={handleCloseDetails} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">✕</button>
+            <h2 className="text-2xl font-bold mb-4">{details?.title}</h2>
+            {detailsLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <>
+                <p className="mb-4">{details?.plot}</p>
+                {details?.director && <p className="mb-2"><strong>Director:</strong> {details.director}</p>}
+                {details?.cast?.length > 0 && <p><strong>Cast:</strong> {details.cast.join(', ')}</p>}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

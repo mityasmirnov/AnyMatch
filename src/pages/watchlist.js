@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserWatchlist, getUserGroups, getGroupMatches, removeFromUserWatchlist, addUserMovieRating, getUserMovieRatings } from '../services/firestore';
-import { getMovieDetails } from '../services/movieService';
+import { getUserWatchlist, getUserGroups, getGroupMatches, removeFromUserWatchlist, addUserMovieRating, getUserMovieRatings, addToUserWatchlist } from '../services/firestore';
+import { getMovieDetails, searchMovies } from '../services/movieService';
 import Link from 'next/link';
 import { useToast } from '../components/ui/toast-provider';
 import { Button } from '../components/ui/button';
@@ -21,6 +21,10 @@ export default function WatchlistPage() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [userRatings, setUserRatings] = useState({});
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   // Track watched movies
   const handleMarkWatched = useCallback((id) => {
@@ -98,12 +102,46 @@ export default function WatchlistPage() {
     loadRatings();
   }, [user]);
 
+  // Search and add movies not yet in swipe
+  const handleSearch = async () => {
+    if (!searchQuery) return;
+    setSearchLoading(true);
+    setSearchError(null);
+    try {
+      const results = await searchMovies(searchQuery);
+      setSearchResults(results);
+    } catch (e) {
+      console.error('Search failed:', e);
+      setSearchError('Search failed');
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleAdd = async (movieId) => {
+    try {
+      await addToUserWatchlist(user.uid, movieId);
+      const detail = await getMovieDetails(movieId);
+      setMovies(prev => [{ ...detail, watched: false }, ...prev]);
+      setSearchResults([]);
+      setSearchQuery('');
+      toast({ title: 'Added to Watchlist', description: detail.title, variant: 'success' });
+    } catch (e) {
+      toast({ title: 'Error', description: 'Failed to add movie', variant: 'error' });
+    }
+  };
+
   // Compute displayed movies based on filter
   const displayedMovies = filter === 'new'
     ? movies.filter(m => !m.watched)
     : filter === 'watched'
       ? movies.filter(m => m.watched)
-      : [...movies.filter(m => !m.watched), ...movies.filter(m => m.watched)];
+      : (() => {
+          const unwatched = movies.filter(m => !m.watched);
+          const watchedUnrated = movies.filter(m => m.watched && !userRatings[m.id]);
+          const watchedRated = movies.filter(m => m.watched && userRatings[m.id]);
+          return [...unwatched, ...watchedUnrated, ...watchedRated];
+        })();
 
   if (authLoading || loading) return (
     <div className="flex justify-center items-center h-screen">
@@ -140,6 +178,40 @@ export default function WatchlistPage() {
             <option value="watched">Watched</option>
           </Select>
         </div>
+        {/* Search for new movies */}
+        {!selectedGroup && (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Add Movie</h2>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search movies..."
+                className="flex-1 px-2 py-1 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              />
+              <Button size="sm" onClick={handleSearch} disabled={searchLoading}>
+                Search
+              </Button>
+            </div>
+            {searchError && <p className="text-red-400 mt-2">{searchError}</p>}
+            {searchResults.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                {searchResults.map(movie => (
+                  <div key={movie.id} className="flex flex-col items-center">
+                    <Link href={`/movie/${movie.id}`}>                
+                      <img src={`https://image.tmdb.org/t/p/w200${movie.posterPath}`} alt={movie.title} className="w-full h-auto rounded" />
+                    </Link>
+                    <span className="mt-2 text-sm text-gray-200">{movie.title}</span>
+                    <Button size="xs" variant="secondary" onClick={() => handleAdd(movie.id)}>
+                      Add
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         {displayedMovies.length === 0 ? (
           <p className="text-center text-gray-500">No movies in this filter.</p>
         ) : (

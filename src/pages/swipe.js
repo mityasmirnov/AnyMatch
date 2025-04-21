@@ -24,6 +24,11 @@ export default function SwipePage() {
   const router = useRouter();
   const { toast } = useToast();
   const { preferences, updatePreferences } = useMovies();
+  // Slider state for minRating filter
+  const [sliderValue, setSliderValue] = useState(preferences.minRating || 0);
+  useEffect(() => {
+    setSliderValue(preferences.minRating || 0);
+  }, [preferences.minRating]);
   
   const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -190,11 +195,6 @@ export default function SwipePage() {
   if (!user || authLoading) {
     return null;
   }
-
-  const [sliderValue, setSliderValue] = useState(preferences.minRating || 0);
-  useEffect(() => {
-    setSliderValue(preferences.minRating || 0);
-  }, [preferences.minRating]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-600 to-indigo-700 py-8 px-4">
