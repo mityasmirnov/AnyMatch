@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserWatchlist, getUserGroups, getGroupMatches, removeFromUserWatchlist } from '../services/firestore';
+import { getUserWatchlist, getUserGroups, getGroupMatches, removeFromUserWatchlist, addUserMovieRating, getUserMovieRatings } from '../services/firestore';
 import { getMovieDetails } from '../services/movieService';
 import Link from 'next/link';
 import { useToast } from '../components/ui/toast-provider';
@@ -19,6 +19,8 @@ export default function WatchlistPage() {
   const [error, setError] = useState(null);
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [userRatings, setUserRatings] = useState({});
+  const [filter, setFilter] = useState('all');
 
   // Track watched movies
   const handleMarkWatched = useCallback((id) => {
@@ -82,6 +84,27 @@ export default function WatchlistPage() {
     })();
   }, [user, authLoading, selectedGroup]);
 
+  // Load user-specific movie ratings
+  useEffect(() => {
+    if (!user) return;
+    const loadRatings = async () => {
+      try {
+        const ratings = await getUserMovieRatings(user.uid);
+        setUserRatings(ratings);
+      } catch (err) {
+        console.error('Ratings load failed:', err);
+      }
+    };
+    loadRatings();
+  }, [user]);
+
+  // Compute displayed movies based on filter
+  const displayedMovies = filter === 'new'
+    ? movies.filter(m => !m.watched)
+    : filter === 'watched'
+      ? movies.filter(m => m.watched)
+      : [...movies.filter(m => !m.watched), ...movies.filter(m => m.watched)];
+
   if (authLoading || loading) return (
     <div className="flex justify-center items-center h-screen">
       <div className="animate-spin h-12 w-12 border-b-2 border-primary-500"></div>
@@ -109,24 +132,53 @@ export default function WatchlistPage() {
             ))}
           </Select>
         </div>
-        {movies.length === 0 ? (
-          <p className="text-center text-gray-500">No movies in your watchlist.</p>
+        <div className="mb-4 flex items-center gap-2">
+          <label htmlFor="filterSelect" className="block text-sm font-medium text-gray-900 dark:text-gray-100">Filter:</label>
+          <Select id="filterSelect" value={filter} onChange={e => setFilter(e.target.value)} className="w-48">
+            <option value="all">All</option>
+            <option value="new">New</option>
+            <option value="watched">Watched</option>
+          </Select>
+        </div>
+        {displayedMovies.length === 0 ? (
+          <p className="text-center text-gray-500">No movies in this filter.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {movies.map(movie => (
+            {displayedMovies.map(movie => (
               <div key={movie.id} className="flex flex-col items-center">
                 <Link href={`/movie/${movie.id}`}>                
                   <div className="aspect-[2/3] rounded-lg overflow-hidden hover:opacity-90 transition">
                     <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} className="w-full h-full object-cover" />
                   </div>
                 </Link>
-                {/* Star rating */}
-                <div className="mt-2 flex gap-1">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} className="text-yellow-400 text-lg">
-                      {i < Math.round(movie.voteAverage / 2) ? '★' : '☆'}
-                    </span>
-                  ))}
+                {/* Ratings */}
+                <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-200">
+                  {movie.imdbRating && <span>IMDB: {movie.imdbRating}</span>}
+                  {movie.rottenTomatoesRating && <span>RT: {movie.rottenTomatoesRating}</span>}
+                  {movie.metascoreRating && <span>Metascore: {movie.metascoreRating}</span>}
+                  {movie.tmdbRating && <span>TMDB: {movie.tmdbRating}</span>}
+                  {!(movie.imdbRating || movie.rottenTomatoesRating || movie.metascoreRating || movie.tmdbRating) && (
+                    <span>No Ratings</span>
+                  )}
+                </div>
+                {/* Your Rating */}
+                <div className="mt-1 flex gap-1">
+                  {Array.from({ length: 5 }, (_, i) => {
+                    const r = i + 1;
+                    const fill = (userRatings[movie.id] || 0) >= r;
+                    return (
+                      <button
+                        key={r}
+                        onClick={async () => {
+                          await addUserMovieRating(user.uid, movie.id, r);
+                          setUserRatings(prev => ({ ...prev, [movie.id]: r }));
+                        }}
+                        className="focus:outline-none text-yellow-400 text-xl"
+                      >
+                        {fill ? '★' : '☆'}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="mt-2 flex gap-2">
                   {!movie.watched ? (

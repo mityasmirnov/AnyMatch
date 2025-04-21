@@ -99,7 +99,7 @@ export const getMovieDetails = async (movieId) => {
       genres: tmdbData.genres,
       runtime: tmdbData.runtime,
       voteAverage: tmdbData.vote_average,
-      imdbRating: omdbData.imdbRating ?? ((tmdbData.vote_average / 2).toFixed(1)),
+      imdbRating: omdbData.imdbRating ?? null,
       rottenTomatoesRating: omdbData.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value ?? null,
       metascoreRating: omdbData.Metascore ?? null,
       director: omdbData.Director ?? tmdbData.credits?.crew?.find(c => c.job === 'Director')?.name ?? null,
@@ -111,6 +111,7 @@ export const getMovieDetails = async (movieId) => {
       boxOffice: omdbData.BoxOffice ?? null,
       trailer: tmdbData.videos?.results?.find(v => v.type === 'Trailer')?.key ?? null,
       watchProviders: tmdbData['watch/providers']?.results?.US ?? null,
+      tmdbRating: tmdbData.vote_average.toFixed(1),
     };
 
     // Cache the details
