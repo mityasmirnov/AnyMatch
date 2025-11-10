@@ -124,6 +124,69 @@ export default function MovieDetailsModal({
                 </div>
               )}
 
+              {/* Streaming Providers */}
+              {(details as any)["watch/providers"]?.results?.US && (
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-3">Where to Watch</h3>
+                  <div className="space-y-4">
+                    {/* Streaming */}
+                    {(details as any)["watch/providers"].results.US.flatrate && (
+                      <div>
+                        <p className="text-white/70 text-sm mb-2">Stream</p>
+                        <div className="flex flex-wrap gap-3">
+                          {(details as any)["watch/providers"].results.US.flatrate.map((provider: any) => (
+                            <div key={provider.provider_id} className="flex flex-col items-center">
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="w-12 h-12 rounded-lg"
+                              />
+                              <span className="text-xs text-white/70 mt-1">{provider.provider_name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Rent */}
+                    {(details as any)["watch/providers"].results.US.rent && (
+                      <div>
+                        <p className="text-white/70 text-sm mb-2">Rent</p>
+                        <div className="flex flex-wrap gap-3">
+                          {(details as any)["watch/providers"].results.US.rent.slice(0, 5).map((provider: any) => (
+                            <div key={provider.provider_id} className="flex flex-col items-center">
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="w-12 h-12 rounded-lg"
+                              />
+                              <span className="text-xs text-white/70 mt-1">{provider.provider_name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Buy */}
+                    {(details as any)["watch/providers"].results.US.buy && (
+                      <div>
+                        <p className="text-white/70 text-sm mb-2">Buy</p>
+                        <div className="flex flex-wrap gap-3">
+                          {(details as any)["watch/providers"].results.US.buy.slice(0, 5).map((provider: any) => (
+                            <div key={provider.provider_id} className="flex flex-col items-center">
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="w-12 h-12 rounded-lg"
+                              />
+                              <span className="text-xs text-white/70 mt-1">{provider.provider_name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Trailer */}
               {(details as any).trailer && (
                 <div>

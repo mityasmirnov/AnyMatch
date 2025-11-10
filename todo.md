@@ -73,3 +73,10 @@
 - [ ] Create user guide
 - [ ] Document API endpoints
 - [ ] Add deployment instructions
+
+## New Features (Completed)
+- [x] Integrate TMDB watch providers API for streaming availability
+- [x] Display streaming platforms in movie details modal
+- [x] Create saved movies page
+- [x] Add filtering and sorting to saved movies
+- [x] Implement actions on saved movies (swipe, remove, mark as watched)

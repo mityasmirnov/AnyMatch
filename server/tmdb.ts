@@ -139,17 +139,33 @@ export async function discoverTV(params: {
 }
 
 /**
- * Get movie details
+ * Get movie details (includes credits, videos, and watch providers)
  */
 export async function getMovieDetails(movieId: number) {
   return tmdbFetch(`/movie/${movieId}`, { append_to_response: "credits,videos,watch/providers" });
 }
 
 /**
- * Get TV show details
+ * Get TV show details (includes credits, videos, and watch providers)
  */
 export async function getTVDetails(tvId: number) {
   return tmdbFetch(`/tv/${tvId}`, { append_to_response: "credits,videos,watch/providers" });
+}
+
+/**
+ * Get watch providers for a movie (standalone)
+ */
+export async function getMovieWatchProviders(movieId: number) {
+  const data = await tmdbFetch<any>(`/movie/${movieId}/watch/providers`);
+  return data.results;
+}
+
+/**
+ * Get watch providers for a TV show (standalone)
+ */
+export async function getTVWatchProviders(tvId: number) {
+  const data = await tmdbFetch<any>(`/tv/${tvId}/watch/providers`);
+  return data.results;
 }
 
 /**

@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import SwipeCard from "@/components/SwipeCard";
 import MovieDetailsModal from "@/components/MovieDetailsModal";
 import { Button } from "@/components/ui/button";
-import { Loader2, RotateCcw, Settings, Info } from "lucide-react";
+import { Loader2, RotateCcw, Settings, Info, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -161,6 +161,15 @@ export default function Swipe() {
                 ))}
               </select>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-white/5 backdrop-blur-xl border-white/10"
+              onClick={() => setLocation("/saved")}
+              title="Saved Movies"
+            >
+              <Bookmark className="w-5 h-5" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

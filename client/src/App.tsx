@@ -9,6 +9,7 @@ import Swipe from "./pages/Swipe";
 import Groups from "./pages/Groups";
 import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
+import Saved from "./pages/Saved";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/groups" component={Groups} />
       <Route path="/matches/:id" component={Matches} />
       <Route path="/profile" component={Profile} />
+      <Route path="/saved" component={Saved} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
