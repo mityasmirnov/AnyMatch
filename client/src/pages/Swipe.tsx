@@ -28,7 +28,7 @@ export default function Swipe() {
       page: 1,
     },
     {
-      enabled: isAuthenticated,
+      enabled: true, // No auth required for browsing movies
     }
   );
 
@@ -86,12 +86,7 @@ export default function Swipe() {
     }
   }, [groups, currentGroupId]);
 
-  // Redirect unauthenticated users to home
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation("/");
-    }
-  }, [authLoading, isAuthenticated, setLocation]);
+  // No redirect - allow swiping without login
 
   if (authLoading) {
     return (
@@ -101,25 +96,31 @@ export default function Swipe() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  // Allow guests to swipe, but show login prompt for certain features
 
   const handleSwipe = async (direction: "left" | "right" | "up" | "down") => {
     const movie = movies[currentIndex];
     if (!movie) return;
 
-    // Record the swipe
-    await swipeMutation.mutateAsync({
-      movieId: movie.id,
-      movieTitle: movie.title,
-      moviePoster: movie.poster,
-      movieType: movie.type,
-      movieGenres: movie.genres,
-      movieRating: movie.rating,
-      direction,
-      groupId: currentGroupId || undefined,
-    });
+    // Check if login required for certain actions
+    if (!isAuthenticated && (direction === "up" || direction === "down")) {
+      toast.error("Please login to use Super Like or Save features");
+      return;
+    }
+
+    // Record the swipe (only if authenticated)
+    if (isAuthenticated) {
+      await swipeMutation.mutateAsync({
+        movieId: movie.id,
+        movieTitle: movie.title,
+        moviePoster: movie.poster,
+        movieType: movie.type,
+        movieGenres: movie.genres,
+        movieRating: movie.rating,
+        direction,
+        groupId: currentGroupId || undefined,
+      });
+    }
 
     // Move to next movie
     setCurrentIndex((prev) => prev + 1);

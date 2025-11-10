@@ -5,6 +5,14 @@ const TMDB_ACCESS_TOKEN = process.env.TMDB_ACCESS_TOKEN;
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
+// Check if API keys are configured
+if (!TMDB_API_KEY || !TMDB_ACCESS_TOKEN) {
+  console.error("[TMDB] Missing API credentials:", {
+    hasApiKey: !!TMDB_API_KEY,
+    hasAccessToken: !!TMDB_ACCESS_TOKEN,
+  });
+}
+
 export interface TMDBMovie {
   id: number;
   title?: string;
@@ -52,6 +60,8 @@ async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`[TMDB] API error: ${response.status} ${response.statusText}`, errorText);
     throw new Error(`TMDB API error: ${response.status} ${response.statusText}`);
   }
 

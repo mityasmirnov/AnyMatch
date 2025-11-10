@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as tmdb from "./tmdb";
 import * as queries from "./queries";
 import * as ai from "./ai-recommendations";
@@ -10,7 +10,7 @@ export const moviesRouter = router({
   /**
    * Get movie/TV genres
    */
-  getGenres: protectedProcedure.query(async () => {
+  getGenres: publicProcedure.query(async () => {
     const [movieGenres, tvGenres] = await Promise.all([
       tmdb.getMovieGenres(),
       tmdb.getTVGenres(),
@@ -21,7 +21,7 @@ export const moviesRouter = router({
   /**
    * Discover movies/TV with filters
    */
-  discover: protectedProcedure
+  discover: publicProcedure
     .input(
       z.object({
         type: z.enum(["movie", "tv", "both"]).default("both"),
@@ -31,10 +31,8 @@ export const moviesRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      const userId = ctx.user.id;
-      
-      // Get user's already swiped movies to filter them out
-      const swipedIds = await queries.getSwipedMovieIds(userId);
+      // Get user's already swiped movies to filter them out (only if authenticated)
+      const swipedIds = ctx.user ? await queries.getSwipedMovieIds(ctx.user.id) : [];
       
       const params = {
         page: input.page,
@@ -64,7 +62,7 @@ export const moviesRouter = router({
   /**
    * Get movie/TV details
    */
-  getDetails: protectedProcedure
+  getDetails: publicProcedure
     .input(
       z.object({
         id: z.string(),
@@ -83,7 +81,7 @@ export const moviesRouter = router({
   /**
    * Search movies and TV shows
    */
-  search: protectedProcedure
+  search: publicProcedure
     .input(
       z.object({
         query: z.string(),

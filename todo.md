@@ -122,3 +122,22 @@
 - [ ] Add "Already in watchlist" indicator in Browse
 - [ ] Migrate saved movies to watchlist system
 - [ ] Update matches to allow adding to watchlist
+
+## Bug Fixes
+- [x] Fix movies not showing in published version (API configuration issue)
+- [x] Verify TMDB API keys are properly configured in production
+- [x] Check CORS and API endpoint accessibility
+- [x] Test movie discovery and search in production environment
+
+## Guest Mode & Accessibility Features
+- [x] Remove authentication requirement from Browse and Swipe pages
+- [x] Allow browsing and swiping without login
+- [x] Show login prompt only when trying to save/watchlist
+- [ ] Implement guest session system with temporary codes
+- [ ] Create guest_sessions database table
+- [ ] Add guest session code generation (6-digit codes)
+- [ ] Allow guests to create temporary matching sessions
+- [ ] Store guest swipes in session storage
+- [ ] Show matches for guest sessions
+- [ ] Add "Sign up to save your matches" prompt for guests
+- [x] Update navigation to show appropriate options for guests vs logged-in users

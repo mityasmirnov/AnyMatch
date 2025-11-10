@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { getLoginUrl } from "@/const";
 import { 
   Film, 
   Heart, 
@@ -33,7 +34,14 @@ export default function Navigation() {
     setMobileMenuOpen(false);
   };
 
-  const navItems = [
+  // Navigation items for guests (no login required)
+  const guestNavItems = [
+    { path: "/swipe", label: "Swipe", icon: Heart },
+    { path: "/browse", label: "Browse", icon: Search },
+  ];
+
+  // Navigation items for logged-in users
+  const userNavItems = [
     { path: "/swipe", label: "Swipe", icon: Heart },
     { path: "/browse", label: "Browse", icon: Search },
     { path: "/groups", label: "Groups", icon: Users },
@@ -41,11 +49,9 @@ export default function Navigation() {
     { path: "/profile", label: "Profile", icon: User },
   ];
 
-  const isActive = (path: string) => location === path;
+  const navItems = isAuthenticated ? userNavItems : guestNavItems;
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  const isActive = (path: string) => location === path;
 
   return (
     <>
@@ -84,15 +90,26 @@ export default function Navigation() {
                 );
               })}
 
-              {/* Logout */}
-              <Button
-                variant="ghost"
-                className="gap-2 text-white/70 hover:text-white hover:bg-white/5"
-                onClick={handleLogout}
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
+              {/* Login/Logout */}
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  className="gap-2 text-white/70 hover:text-white hover:bg-white/5"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  className="gap-2"
+                  onClick={() => window.location.href = getLoginUrl()}
+                >
+                  <User className="w-4 h-4" />
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -151,14 +168,25 @@ export default function Navigation() {
 
               <div className="border-t border-white/10 my-2" />
 
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 h-12 text-white/70 hover:text-white hover:bg-white/5"
-                onClick={handleLogout}
-              >
-                <LogOut className="w-5 h-5" />
-                Logout
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 h-12 text-white/70 hover:text-white hover:bg-white/5"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  className="w-full justify-start gap-3 h-12"
+                  onClick={() => window.location.href = getLoginUrl()}
+                >
+                  <User className="w-5 h-5" />
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         )}

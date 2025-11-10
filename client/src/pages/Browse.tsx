@@ -29,12 +29,7 @@ export default function Browse() {
     );
   };
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation("/");
-    }
-  }, [authLoading, isAuthenticated, setLocation]);
+  // No redirect - allow browsing without login
 
   // Debounce search query
   useEffect(() => {
@@ -45,7 +40,9 @@ export default function Browse() {
   }, [searchQuery]);
 
   // Fetch genres
-  const { data: genresData } = trpc.movies.getGenres.useQuery();
+  const { data: genresData } = trpc.movies.getGenres.useQuery(undefined, {
+    enabled: true, // Always enabled, no auth required
+  });
   const allGenres = genresData
     ? [...genresData.movieGenres, ...genresData.tvGenres]
     : [];
@@ -60,7 +57,7 @@ export default function Browse() {
       genres: selectedGenres.length > 0 ? selectedGenres : undefined,
     },
     {
-      enabled: isAuthenticated && debouncedQuery === "",
+      enabled: debouncedQuery === "", // No auth required
     }
   );
 
@@ -70,7 +67,7 @@ export default function Browse() {
       page: 1,
     },
     {
-      enabled: isAuthenticated && debouncedQuery.length > 0,
+      enabled: debouncedQuery.length > 0, // No auth required
     }
   );
 
@@ -92,6 +89,10 @@ export default function Browse() {
   });
 
   const handleAddToWatchlist = (movie: any) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to add to watchlist");
+      return;
+    }
     addToWatchlistMutation.mutate({
       movieId: movie.id.toString(),
       movieTitle: movie.title || movie.name,
@@ -116,7 +117,7 @@ export default function Browse() {
     );
   };
 
-  if (authLoading || !isAuthenticated) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
