@@ -9,6 +9,7 @@ import {
   swipesRouter,
   savedRouter,
   notificationsRouter,
+  aiRouter,
 } from "./anymatch-routers";
 
 export const appRouter = router({
@@ -32,6 +33,7 @@ export const appRouter = router({
   swipes: swipesRouter,
   saved: savedRouter,
   notifications: notificationsRouter,
+  ai: aiRouter,
 });
 
 export type AppRouter = typeof appRouter;

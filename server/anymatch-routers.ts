@@ -2,6 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "./_core/trpc";
 import * as tmdb from "./tmdb";
 import * as queries from "./queries";
+import * as ai from "./ai-recommendations";
 
 // ============= Movies Router =============
 
@@ -402,6 +403,40 @@ export const savedRouter = router({
 });
 
 // ============= Notifications Router =============
+
+// ============= AI Recommendations Router =============
+
+export const aiRouter = router({
+  /**
+   * Get AI-powered recommendations
+   */
+  getRecommendations: protectedProcedure
+    .input(z.object({ limit: z.number().default(10) }))
+    .query(async ({ input, ctx }) => {
+      return ai.getAIRecommendations(ctx.user.id, input.limit);
+    }),
+
+  /**
+   * Get collaborative filtering recommendations for a group
+   */
+  getGroupRecommendations: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.number(),
+        limit: z.number().default(10),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      return ai.getCollaborativeRecommendations(ctx.user.id, input.groupId, input.limit);
+    }),
+
+  /**
+   * Analyze user preferences
+   */
+  analyzePreferences: protectedProcedure.query(async ({ ctx }) => {
+    return ai.analyzeUserPreferences(ctx.user.id);
+  }),
+});
 
 export const notificationsRouter = router({
   /**
