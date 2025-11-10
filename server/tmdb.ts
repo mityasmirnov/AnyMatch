@@ -5,6 +5,28 @@ const TMDB_ACCESS_TOKEN = process.env.TMDB_ACCESS_TOKEN;
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
+// Simple in-memory cache
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCached(key: string): any | null {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  cache.delete(key);
+  return null;
+}
+
+function setCache(key: string, data: any): void {
+  cache.set(key, { data, timestamp: Date.now() });
+  // Clean old entries if cache gets too large
+  if (cache.size > 1000) {
+    const oldestKey = cache.keys().next().value;
+    if (oldestKey) cache.delete(oldestKey);
+  }
+}
+
 // Check if API keys are configured
 if (!TMDB_API_KEY || !TMDB_ACCESS_TOKEN) {
   console.error("[TMDB] Missing API credentials:", {
@@ -42,7 +64,18 @@ export interface TMDBResponse<T> {
 /**
  * Make authenticated request to TMDB API
  */
-async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {}, useCache = true): Promise<T> {
+  // Generate cache key
+  const cacheKey = `${endpoint}?${JSON.stringify(params)}`;
+  
+  // Check cache
+  if (useCache) {
+    const cached = getCached(cacheKey);
+    if (cached) {
+      return cached;
+    }
+  }
+
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
   
   // Add API key to params
@@ -65,7 +98,14 @@ async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {
     throw new Error(`TMDB API error: ${response.status} ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  
+  // Cache the response
+  if (useCache) {
+    setCache(cacheKey, data);
+  }
+  
+  return data;
 }
 
 /**

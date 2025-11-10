@@ -22,6 +22,8 @@ export default function Browse() {
   const [selectedProviders, setSelectedProviders] = useState<number[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [allMovies, setAllMovies] = useState<any[]>([]);
 
   const toggleProvider = (providerId: number) => {
     setSelectedProviders((prev) =>
@@ -50,10 +52,10 @@ export default function Browse() {
   const genres = Array.from(new Map(allGenres.map((g) => [g.id, g])).values());
 
   // Fetch movies based on search or discover
-  const { data: movies, isLoading: moviesLoading } = trpc.movies.discover.useQuery(
+  const { data: movies, isLoading: moviesLoading, isFetching: moviesFetching } = trpc.movies.discover.useQuery(
     {
       type: contentType,
-      page: 1,
+      page: page,
       genres: selectedGenres.length > 0 ? selectedGenres : undefined,
     },
     {
@@ -61,18 +63,57 @@ export default function Browse() {
     }
   );
 
-  const { data: searchResults, isLoading: searchLoading } = trpc.movies.search.useQuery(
+  const { data: searchResults, isLoading: searchLoading, isFetching: searchFetching } = trpc.movies.search.useQuery(
     {
       query: debouncedQuery,
-      page: 1,
+      page: page,
     },
     {
       enabled: debouncedQuery.length > 0, // No auth required
     }
   );
 
-  const displayMovies = debouncedQuery ? searchResults : movies;
-  const isLoading = debouncedQuery ? searchLoading : moviesLoading;
+  // Accumulate movies for infinite scroll
+  useEffect(() => {
+    if (movies && !debouncedQuery) {
+      if (page === 1) {
+        setAllMovies(movies);
+      } else {
+        setAllMovies((prev) => [...prev, ...movies]);
+      }
+    }
+  }, [movies, page, debouncedQuery]);
+
+  useEffect(() => {
+    if (searchResults && debouncedQuery) {
+      if (page === 1) {
+        setAllMovies(searchResults);
+      } else {
+        setAllMovies((prev) => [...prev, ...searchResults]);
+      }
+    }
+  }, [searchResults, page, debouncedQuery]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+    setAllMovies([]);
+  }, [debouncedQuery, selectedGenres, contentType]);
+
+  const displayMovies = allMovies;
+  const isLoading = (page === 1) && (debouncedQuery ? searchLoading : moviesLoading);
+  const isFetching = debouncedQuery ? searchFetching : moviesFetching;
+
+  // Check which movies are in watchlist
+  const movieIds = displayMovies?.map((m: any) => m.id.toString()) || [];
+  const { data: watchlistStatus } = trpc.watchlist.checkMultiple.useQuery(
+    { movieIds },
+    { enabled: isAuthenticated && movieIds.length > 0 }
+  );
+
+  const isInWatchlist = (movieId: string) => {
+    return watchlistStatus?.find((s) => s.movieId === movieId)?.inWatchlist || false;
+  };
 
   // Add to watchlist mutation
   const addToWatchlistMutation = trpc.watchlist.add.useMutation({
@@ -257,6 +298,7 @@ export default function Browse() {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : displayMovies && displayMovies.length > 0 ? (
+          <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {displayMovies.map((movie: any) => (
               <div
@@ -289,17 +331,28 @@ export default function Browse() {
 
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToWatchlist(movie);
-                      }}
-                      disabled={addToWatchlistMutation.isPending}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add to Watchlist
-                    </Button>
+                    {isAuthenticated && isInWatchlist(movie.id.toString()) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="glass border-green-500/50 text-green-400 pointer-events-none"
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        In Watchlist
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToWatchlist(movie);
+                        }}
+                        disabled={addToWatchlistMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add to Watchlist
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -319,6 +372,27 @@ export default function Browse() {
               </div>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {displayMovies && displayMovies.length >= 20 && (
+            <div className="flex justify-center mt-8">
+              <Button
+                onClick={() => setPage((prev) => prev + 1)}
+                disabled={isFetching}
+                className="gradient-primary"
+              >
+                {isFetching ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </Button>
+            </div>
+          )}
+          </>
         ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground">

@@ -45,6 +45,14 @@ export default function Swipe() {
     }
   );
 
+  // Check if current movie is in watchlist
+  const currentMovie = movies[currentIndex];
+  const { data: watchlistCheck } = trpc.watchlist.check.useQuery(
+    { movieId: currentMovie?.id?.toString() || "" },
+    { enabled: isAuthenticated && !!currentMovie }
+  );
+  const isCurrentInWatchlist = watchlistCheck?.inWatchlist || false;
+
   // Guest swipe mutation
   const guestSwipeMutation = trpc.guestSession.swipe.useMutation({
     onSuccess: (data) => {
@@ -176,8 +184,6 @@ export default function Swipe() {
     }
   };
 
-  const currentMovie = movies[currentIndex];
-
   return (
     <div className="min-h-screen animated-gradient">
       <div className="container mx-auto px-4 py-8">
@@ -253,16 +259,24 @@ export default function Swipe() {
             <div className="relative h-[600px]">
               {/* Stack of cards (show next 2 cards behind) */}
               {movies.slice(currentIndex, currentIndex + 3).map((movie, index) => (
-                <SwipeCard
-                  key={`${movie.id}-${currentIndex + index}`}
-                  movie={movie}
-                  onSwipe={index === 0 ? handleSwipe : () => {}}
-                  style={{
-                    zIndex: 3 - index,
-                    scale: 1 - index * 0.05,
-                    opacity: 1 - index * 0.3,
-                  }}
-                />
+                <div key={`${movie.id}-${currentIndex + index}`} className="relative">
+                  <SwipeCard
+                    movie={movie}
+                    onSwipe={index === 0 ? handleSwipe : () => {}}
+                    style={{
+                      zIndex: 3 - index,
+                      scale: 1 - index * 0.05,
+                      opacity: 1 - index * 0.3,
+                    }}
+                  />
+                  {/* Watchlist Badge */}
+                  {index === 0 && isAuthenticated && isCurrentInWatchlist && (
+                    <div className="absolute top-4 right-4 z-50 bg-green-500/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5 shadow-lg">
+                      <Bookmark className="w-3.5 h-3.5 fill-white" />
+                      In Watchlist
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           ) : (

@@ -45,6 +45,21 @@ export const watchlistRouter = router({
     }),
 
   /**
+   * Check multiple movies at once
+   */
+  checkMultiple: protectedProcedure
+    .input(z.object({ movieIds: z.array(z.string()) }))
+    .query(async ({ input, ctx }) => {
+      const results = await Promise.all(
+        input.movieIds.map(async (movieId) => {
+          const inWatchlist = await watchlistQueries.isInWatchlist(ctx.user.id, movieId);
+          return { movieId, inWatchlist };
+        })
+      );
+      return results;
+    }),
+
+  /**
    * Remove from watchlist
    */
   remove: protectedProcedure

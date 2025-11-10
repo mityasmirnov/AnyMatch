@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Check } from "lucide-react";
+import { Loader2, ArrowLeft, Check, Plus, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useParams } from "wouter";
 import { useEffect } from "react";
@@ -14,6 +14,20 @@ export default function Matches() {
   const groupId = params.id ? parseInt(params.id) : null;
 
   const utils = trpc.useUtils();
+
+  // Add to watchlist mutation
+  const addToWatchlistMutation = trpc.watchlist.add.useMutation({
+    onSuccess: (data) => {
+      if (data.alreadyExists) {
+        toast.info("Already in watchlist");
+      } else {
+        toast.success("Added to watchlist!");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to add to watchlist");
+    },
+  });
 
   // Fetch group details
   const { data: group } = trpc.groups.get.useQuery(
@@ -99,12 +113,31 @@ export default function Matches() {
                       <h3 className="text-white font-semibold text-sm mb-1">
                         {match.movieTitle}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-white/80">
+                      <div className="flex items-center gap-2 text-xs text-white/80 mb-2">
                         <span className="px-2 py-1 bg-white/20 backdrop-blur-sm rounded">
                           {match.movieType === "movie" ? "Movie" : "TV"}
                         </span>
                         <span>⭐ {((match.movieRating || 0) / 10).toFixed(1)}</span>
                       </div>
+                      <Button
+                        size="sm"
+                        className="w-full gradient-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToWatchlistMutation.mutate({
+                            movieId: match.movieId,
+                            movieTitle: match.movieTitle,
+                            moviePoster: match.moviePoster,
+                            movieType: match.movieType,
+                            movieRating: match.movieRating || undefined,
+                            addedFrom: "match",
+                          });
+                        }}
+                        disabled={addToWatchlistMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add to Watchlist
+                      </Button>
                     </div>
                   </div>
                 </div>

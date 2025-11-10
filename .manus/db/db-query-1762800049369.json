@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO watchlist (userId, movieId, movieTitle, moviePoster, movieType, movieRating, addedFrom)\nSELECT \n  userId,\n  movieId,\n  movieTitle,\n  moviePoster,\n  movieType,\n  movieRating,\n  'swipe' as addedFrom\nFROM saved_movies\nWHERE NOT EXISTS (\n  SELECT 1 FROM watchlist \n  WHERE watchlist.userId = saved_movies.userId \n  AND watchlist.movieId = saved_movies.movieId\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2eNqdHnpnVAGVpu.root --database GJvAyc4uSA6Y5a2E3cgCYe --execute INSERT INTO watchlist (userId, movieId, movieTitle, moviePoster, movieType, movieRating, addedFrom)\nSELECT \n  userId,\n  movieId,\n  movieTitle,\n  moviePoster,\n  movieType,\n  movieRating,\n  'swipe' as addedFrom\nFROM saved_movies\nWHERE NOT EXISTS (\n  SELECT 1 FROM watchlist \n  WHERE watchlist.userId = saved_movies.userId \n  AND watchlist.movieId = saved_movies.movieId\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 48
+}

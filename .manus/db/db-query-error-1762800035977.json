@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO watchlist (user_id, movie_id, movie_title, movie_poster, movie_type, movie_rating, added_from, created_at)\nSELECT \n  user_id,\n  movie_id,\n  movie_title,\n  movie_poster,\n  movie_type,\n  movie_rating,\n  'swipe' as added_from,\n  created_at\nFROM saved_movies\nWHERE NOT EXISTS (\n  SELECT 1 FROM watchlist \n  WHERE watchlist.user_id = saved_movies.user_id \n  AND watchlist.movie_id = saved_movies.movie_id\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2eNqdHnpnVAGVpu.root --database GJvAyc4uSA6Y5a2E3cgCYe --execute INSERT INTO watchlist (user_id, movie_id, movie_title, movie_poster, movie_type, movie_rating, added_from, created_at)\nSELECT \n  user_id,\n  movie_id,\n  movie_title,\n  movie_poster,\n  movie_type,\n  movie_rating,\n  'swipe' as added_from,\n  created_at\nFROM saved_movies\nWHERE NOT EXISTS (\n  SELECT 1 FROM watchlist \n  WHERE watchlist.user_id = saved_movies.user_id \n  AND watchlist.movie_id = saved_movies.movie_id\n);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'user_id' in 'field list'"
+  ]
+}

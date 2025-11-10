@@ -110,7 +110,8 @@
 - [x] Add genre multi-select filter
 - [x] Add streaming service filter (Netflix, Disney+, Hulu, etc.)
 - [x] Add sort options (popularity, rating, release date)
-- [ ] Implement pagination for search results
+- [x] Implement pagination for Browse with infinite scroll
+- [x] Add TMDB API response caching for better performance
 - [x] Add "Add to Watchlist" button on movie cards
 
 ## Unified Watchlist System
@@ -119,9 +120,9 @@
 - [x] Create watchlist tRPC router with CRUD operations
 - [x] Build Watchlist page with grid view
 - [x] Add remove from watchlist functionality
-- [ ] Add "Already in watchlist" indicator in Browse
-- [ ] Migrate saved movies to watchlist system
-- [ ] Update matches to allow adding to watchlist
+- [x] Add "Already in watchlist" indicator in Browse and Swipe
+- [x] Migrate saved movies to watchlist system
+- [x] Update matches to allow adding to watchlist
 
 ## Bug Fixes
 - [x] Fix movies not showing in published version (API configuration issue)
