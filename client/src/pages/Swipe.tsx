@@ -142,45 +142,24 @@ export default function Swipe() {
   return (
     <div className="min-h-screen animated-gradient">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-white text-shadow">
-            AnyMatch
-          </h1>
-          <div className="flex items-center gap-4">
-            {groups && groups.length > 0 && (
-              <select
-                value={currentGroupId || ""}
-                onChange={(e) => setCurrentGroupId(Number(e.target.value))}
-                className="glass-button text-sm"
-              >
-                {groups.map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-white/5 backdrop-blur-xl border-white/10"
-              onClick={() => setLocation("/saved")}
-              title="Saved Movies"
+        {/* Group Selector */}
+        {groups && groups.length > 0 && (
+          <div className="mb-8">
+            <label className="block text-white/70 text-sm mb-2">Active Group</label>
+            <select
+              value={currentGroupId || ""}
+              onChange={(e) => setCurrentGroupId(e.target.value ? Number(e.target.value) : null)}
+              className="w-full bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-lg px-4 py-3"
             >
-              <Bookmark className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-white/5 backdrop-blur-xl border-white/10"
-              onClick={() => setLocation("/profile")}
-              title="Profile"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
+              <option value="">Solo Mode</option>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
+        )}
 
         {/* Swipe Area */}
         <div className="max-w-md mx-auto">

@@ -108,18 +108,13 @@ export default function Groups() {
     <div className="min-h-screen animated-gradient">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white text-shadow mb-2">
-              Your Groups
-            </h1>
-            <p className="text-white/70">
-              Create or join groups to match movies with friends
-            </p>
-          </div>
-          <Button onClick={() => setLocation("/swipe")} className="gradient-primary">
-            Start Swiping
-          </Button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white text-shadow mb-2">
+            Your Groups
+          </h1>
+          <p className="text-white/70">
+            Create or join groups to match movies with friends
+          </p>
         </div>
 
         {/* Action Buttons */}

@@ -52,23 +52,13 @@ export default function Matches() {
     <div className="min-h-screen animated-gradient">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="glass"
-            onClick={() => setLocation("/groups")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-white text-shadow">
-              {group?.name || "Group Matches"}
-            </h1>
-            <p className="text-white/70">
-              Movies everyone in your group liked
-            </p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white text-shadow">
+            {group?.name || "Group Matches"}
+          </h1>
+          <p className="text-white/70">
+            Movies everyone in your group liked
+          </p>
         </div>
 
         {/* Matches Grid */}
