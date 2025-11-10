@@ -14,6 +14,7 @@ import Saved from "./pages/Saved";
 import Browse from "./pages/Browse";
 import Watchlist from "./pages/Watchlist";
 import GuestMatches from "./pages/GuestMatches";
+import SessionJoin from "./pages/SessionJoin";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/watchlist" component={Watchlist} />
       <Route path="/profile" component={Profile} />
       <Route path="/guest-matches" component={GuestMatches} />
+      <Route path="/session/:code" component={SessionJoin} />
       <Route path="/saved" component={Saved} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

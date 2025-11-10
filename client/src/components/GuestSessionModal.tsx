@@ -124,14 +124,36 @@ export default function GuestSessionModal({ isOpen, onClose, onSessionJoined }: 
               <div className="text-6xl font-bold text-white tracking-widest">
                 {createdCode}
               </div>
-              <Button
-                onClick={handleCopyCode}
-                variant="outline"
-                className="glass border-white/20"
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                Copy Code
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleCopyCode}
+                  variant="outline"
+                  className="flex-1 glass border-white/20"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy Code
+                </Button>
+                <Button
+                  onClick={() => {
+                    const shareableLink = `${window.location.origin}/session/${createdCode}`;
+                    navigator.clipboard.writeText(shareableLink);
+                    toast.success("Link copied to clipboard!");
+                  }}
+                  className="flex-1 gradient-primary"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy Link
+                </Button>
+              </div>
+            </div>
+
+            <div className="glass-card p-4">
+              <p className="text-white/70 text-xs mb-2">Shareable Link</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-white/90 text-sm bg-black/20 px-3 py-2 rounded overflow-x-auto">
+                  {window.location.origin}/session/{createdCode}
+                </code>
+              </div>
             </div>
 
             <p className="text-white/70 text-center text-sm">

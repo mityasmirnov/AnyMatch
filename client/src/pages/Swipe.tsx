@@ -17,9 +17,17 @@ export default function Swipe() {
   const [currentGroupId, setCurrentGroupId] = useState<number | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
-  const [guestSessionId, setGuestSessionId] = useState<number | null>(null);
-  const [guestSessionCode, setGuestSessionCode] = useState<string | null>(null);
-  const [guestIdentifier] = useState(() => `guest_${Math.random().toString(36).substr(2, 9)}`);
+  const [guestSessionId, setGuestSessionId] = useState<number | null>(() => {
+    const stored = localStorage.getItem("guestSessionId");
+    return stored ? parseInt(stored) : null;
+  });
+  const [guestSessionCode, setGuestSessionCode] = useState<string | null>(() => {
+    return localStorage.getItem("guestSessionCode");
+  });
+  const [guestIdentifier] = useState(() => {
+    const stored = localStorage.getItem("guestIdentifier");
+    return stored || `guest_${Math.random().toString(36).substr(2, 9)}`;
+  });
 
   // Fetch user groups
   const { data: groups } = trpc.groups.list.useQuery(undefined, {
@@ -205,6 +213,9 @@ export default function Swipe() {
                 onClick={() => {
                   setGuestSessionId(null);
                   setGuestSessionCode(null);
+                  localStorage.removeItem("guestSessionId");
+                  localStorage.removeItem("guestSessionCode");
+                  localStorage.removeItem("guestIdentifier");
                 }}
               >
                 Leave Session
@@ -339,6 +350,8 @@ export default function Swipe() {
           onSessionJoined={(sessionId, sessionCode) => {
             setGuestSessionId(sessionId);
             setGuestSessionCode(sessionCode);
+            localStorage.setItem("guestSessionId", sessionId.toString());
+            localStorage.setItem("guestSessionCode", sessionCode);
             toast.success(`Joined session ${sessionCode}!`);
           }}
         />

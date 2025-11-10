@@ -145,3 +145,11 @@
 - [x] Add session expiration (24 hours)
 - [x] Add "Sign up to save your matches" prompt for guests
 - [x] Update navigation to show appropriate options for guests vs logged-in users
+
+## Shareable Session Links
+- [x] Create /session/:code route that auto-joins sessions
+- [x] Update GuestSessionModal to display shareable link
+- [x] Add copy link button with clipboard API
+- [x] Show toast notification when link is copied
+- [x] Handle invalid session codes gracefully
+- [ ] Add social sharing options (WhatsApp, Telegram, etc.)
