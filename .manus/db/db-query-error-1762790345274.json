@@ -1,0 +1,8 @@
+{
+  "query": "DROP TABLE IF EXISTS notifications, saved_movies, matches, swipes, group_members, groups, user_preferences",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2eNqdHnpnVAGVpu.root --database GJvAyc4uSA6Y5a2E3cgCYe --execute DROP TABLE IF EXISTS notifications, saved_movies, matches, swipes, group_members, groups, user_preferences",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 88 near \"groups, user_preferences\""
+  ]
+}
