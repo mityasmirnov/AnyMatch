@@ -34,10 +34,17 @@ export default function Swipe() {
     enabled: isAuthenticated,
   });
 
+  // Fetch user preferences for content type
+  const { data: preferences } = trpc.preferences.get.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const contentType = preferences?.preferredContentType || "both";
+
   // Fetch movies
   const { data: moviesData, isLoading: moviesLoading, refetch } = trpc.movies.discover.useQuery(
     {
-      type: "both",
+      type: contentType,
       page: 1,
     },
     {
@@ -250,7 +257,7 @@ export default function Swipe() {
         )}
 
         {/* Swipe Area */}
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-md mx-auto w-full px-4">
           {moviesLoading ? (
             <div className="flex items-center justify-center h-[700px] md:h-[800px]">
               <Loader2 className="w-12 h-12 animate-spin text-white" />

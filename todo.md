@@ -165,3 +165,9 @@
 - [x] Fix Swipe page card size (currently too small)
 - [x] Ensure proper responsive sizing for movie cards
 - [x] Verify API configuration in production
+
+## Card Aspect Ratio & TV Shows
+- [x] Fix Swipe card aspect ratio (make taller/portrait-oriented)
+- [x] Ensure TV shows are included in discovery feed
+- [x] Verify TV show metadata displays correctly
+- [x] Respect user content type preferences in Swipe page
