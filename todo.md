@@ -133,11 +133,15 @@
 - [x] Remove authentication requirement from Browse and Swipe pages
 - [x] Allow browsing and swiping without login
 - [x] Show login prompt only when trying to save/watchlist
-- [ ] Implement guest session system with temporary codes
-- [ ] Create guest_sessions database table
-- [ ] Add guest session code generation (6-digit codes)
-- [ ] Allow guests to create temporary matching sessions
-- [ ] Store guest swipes in session storage
-- [ ] Show matches for guest sessions
-- [ ] Add "Sign up to save your matches" prompt for guests
+- [x] Implement guest session system with temporary codes
+- [x] Create guest_sessions and guest_swipes database tables
+- [x] Add guest session code generation (6-digit codes)
+- [x] Build guest session creation and join functionality
+- [x] Implement guest swipe recording with session ID
+- [x] Create guest matching algorithm
+- [x] Build guest session UI (create/join modal)
+- [x] Update Swipe page to support guest sessions
+- [x] Create guest matches view page
+- [x] Add session expiration (24 hours)
+- [x] Add "Sign up to save your matches" prompt for guests
 - [x] Update navigation to show appropriate options for guests vs logged-in users

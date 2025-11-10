@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS guest_swipes (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  session_id INT NOT NULL,\n  guest_identifier VARCHAR(255) NOT NULL,\n  movie_id VARCHAR(50) NOT NULL,\n  movie_title VARCHAR(500) NOT NULL,\n  movie_poster TEXT,\n  movie_type ENUM('movie', 'tv') NOT NULL,\n  movie_genres JSON,\n  movie_rating DECIMAL(3,1),\n  direction ENUM('left', 'right', 'up', 'down') NOT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (session_id) REFERENCES guest_sessions(id) ON DELETE CASCADE,\n  INDEX idx_session_guest (session_id, guest_identifier),\n  INDEX idx_movie (movie_id)\n)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2eNqdHnpnVAGVpu.root --database GJvAyc4uSA6Y5a2E3cgCYe --execute CREATE TABLE IF NOT EXISTS guest_swipes (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  session_id INT NOT NULL,\n  guest_identifier VARCHAR(255) NOT NULL,\n  movie_id VARCHAR(50) NOT NULL,\n  movie_title VARCHAR(500) NOT NULL,\n  movie_poster TEXT,\n  movie_type ENUM('movie', 'tv') NOT NULL,\n  movie_genres JSON,\n  movie_rating DECIMAL(3,1),\n  direction ENUM('left', 'right', 'up', 'down') NOT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (session_id) REFERENCES guest_sessions(id) ON DELETE CASCADE,\n  INDEX idx_session_guest (session_id, guest_identifier),\n  INDEX idx_movie (movie_id)\n)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 270
+}

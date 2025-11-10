@@ -3,8 +3,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import SwipeCard from "@/components/SwipeCard";
 import MovieDetailsModal from "@/components/MovieDetailsModal";
+import GuestSessionModal from "@/components/GuestSessionModal";
 import { Button } from "@/components/ui/button";
-import { Loader2, RotateCcw, Settings, Info, Bookmark } from "lucide-react";
+import { Loader2, RotateCcw, Settings, Info, Bookmark, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -15,6 +16,10 @@ export default function Swipe() {
   const [movies, setMovies] = useState<any[]>([]);
   const [currentGroupId, setCurrentGroupId] = useState<number | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [guestSessionId, setGuestSessionId] = useState<number | null>(null);
+  const [guestSessionCode, setGuestSessionCode] = useState<string | null>(null);
+  const [guestIdentifier] = useState(() => `guest_${Math.random().toString(36).substr(2, 9)}`);
 
   // Fetch user groups
   const { data: groups } = trpc.groups.list.useQuery(undefined, {
@@ -31,6 +36,17 @@ export default function Swipe() {
       enabled: true, // No auth required for browsing movies
     }
   );
+
+  // Guest swipe mutation
+  const guestSwipeMutation = trpc.guestSession.swipe.useMutation({
+    onSuccess: (data) => {
+      if (data.matched) {
+        toast.success("🎉 It's a Match!", {
+          description: "You and your friends matched on this movie!",
+        });
+      }
+    },
+  });
 
   // Swipe mutation
   const swipeMutation = trpc.swipes.swipe.useMutation({
@@ -103,13 +119,27 @@ export default function Swipe() {
     if (!movie) return;
 
     // Check if login required for certain actions
-    if (!isAuthenticated && (direction === "up" || direction === "down")) {
+    if (!isAuthenticated && !guestSessionId && (direction === "up" || direction === "down")) {
       toast.error("Please login to use Super Like or Save features");
       return;
     }
 
-    // Record the swipe (only if authenticated)
-    if (isAuthenticated) {
+    // Record the swipe
+    if (guestSessionId) {
+      // Guest session swipe
+      await guestSwipeMutation.mutateAsync({
+        sessionId: guestSessionId,
+        guestIdentifier,
+        movieId: movie.id,
+        movieTitle: movie.title,
+        moviePoster: movie.poster,
+        movieType: movie.type,
+        movieGenres: movie.genres,
+        movieRating: movie.rating,
+        direction,
+      });
+    } else if (isAuthenticated) {
+      // Authenticated user swipe
       await swipeMutation.mutateAsync({
         movieId: movie.id,
         movieTitle: movie.title,
@@ -143,6 +173,46 @@ export default function Swipe() {
   return (
     <div className="min-h-screen animated-gradient">
       <div className="container mx-auto px-4 py-8">
+        {/* Guest Session Banner */}
+        {!isAuthenticated && !guestSessionId && (
+          <div className="mb-6 glass-card text-center p-6">
+            <h3 className="text-xl font-bold text-white mb-2">Swipe Together!</h3>
+            <p className="text-white/70 mb-4">
+              Create or join a guest session to match movies with friends without signing up.
+            </p>
+            <Button
+              onClick={() => setShowGuestModal(true)}
+              className="gradient-primary"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Start Guest Session
+            </Button>
+          </div>
+        )}
+
+        {/* Active Guest Session Info */}
+        {guestSessionId && guestSessionCode && (
+          <div className="mb-6 glass-card p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-sm">Guest Session</p>
+                <p className="text-2xl font-bold text-white tracking-wider">{guestSessionCode}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="glass border-white/20"
+                onClick={() => {
+                  setGuestSessionId(null);
+                  setGuestSessionCode(null);
+                }}
+              >
+                Leave Session
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Group Selector */}
         {groups && groups.length > 0 && (
           <div className="mb-8">
@@ -261,6 +331,17 @@ export default function Swipe() {
             onSwipe={handleSwipe}
           />
         )}
+
+        {/* Guest Session Modal */}
+        <GuestSessionModal
+          isOpen={showGuestModal}
+          onClose={() => setShowGuestModal(false)}
+          onSessionJoined={(sessionId, sessionCode) => {
+            setGuestSessionId(sessionId);
+            setGuestSessionCode(sessionCode);
+            toast.success(`Joined session ${sessionCode}!`);
+          }}
+        />
       </div>
     </div>
   );

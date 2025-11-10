@@ -185,3 +185,36 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Guest sessions for temporary matching without accounts
+ */
+export const guestSessions = mysqlTable("guest_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionCode: varchar("session_code", { length: 6 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export type GuestSession = typeof guestSessions.$inferSelect;
+export type InsertGuestSession = typeof guestSessions.$inferInsert;
+
+/**
+ * Guest swipes for temporary sessions
+ */
+export const guestSwipes = mysqlTable("guest_swipes", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("session_id").notNull(),
+  guestIdentifier: varchar("guest_identifier", { length: 255 }).notNull(),
+  movieId: varchar("movie_id", { length: 50 }).notNull(),
+  movieTitle: varchar("movie_title", { length: 500 }).notNull(),
+  moviePoster: text("movie_poster"),
+  movieType: mysqlEnum("movie_type", ["movie", "tv"]).notNull(),
+  movieGenres: json("movie_genres").$type<number[]>(),
+  movieRating: int("movie_rating").default(0),
+  direction: mysqlEnum("direction", ["left", "right", "up", "down"]).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type GuestSwipe = typeof guestSwipes.$inferSelect;
+export type InsertGuestSwipe = typeof guestSwipes.$inferInsert;
