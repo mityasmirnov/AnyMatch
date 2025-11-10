@@ -160,3 +160,8 @@
 - [x] Implement Intersection Observer API for scroll detection
 - [x] Add loading spinner at bottom during fetch
 - [x] Handle edge cases (end of results, errors)
+
+## UI Fixes
+- [x] Fix Swipe page card size (currently too small)
+- [x] Ensure proper responsive sizing for movie cards
+- [x] Verify API configuration in production

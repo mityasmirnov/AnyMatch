@@ -250,13 +250,13 @@ export default function Swipe() {
         )}
 
         {/* Swipe Area */}
-        <div className="max-w-md mx-auto">
+        <div className="max-w-2xl mx-auto">
           {moviesLoading ? (
-            <div className="flex items-center justify-center h-[600px]">
+            <div className="flex items-center justify-center h-[700px] md:h-[800px]">
               <Loader2 className="w-12 h-12 animate-spin text-white" />
             </div>
           ) : currentMovie ? (
-            <div className="relative h-[600px]">
+            <div className="relative h-[700px] md:h-[800px]">
               {/* Stack of cards (show next 2 cards behind) */}
               {movies.slice(currentIndex, currentIndex + 3).map((movie, index) => (
                 <div key={`${movie.id}-${currentIndex + index}`} className="relative">
@@ -280,7 +280,7 @@ export default function Swipe() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-[600px] glass-card">
+            <div className="flex flex-col items-center justify-center h-[700px] md:h-[800px] glass-card">
               <p className="text-xl text-white/80 mb-4">No more movies!</p>
               <Button onClick={() => refetch()} className="gradient-primary">
                 Load More
