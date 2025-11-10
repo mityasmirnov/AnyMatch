@@ -102,3 +102,23 @@
 - [x] Document API endpoints and data models
 - [x] Add deployment instructions
 - [x] Write README with setup steps
+
+## Browse & Search Features
+- [x] Create Browse/Search page with movie grid
+- [x] Implement search functionality with TMDB API
+- [x] Add year range filter (from/to)
+- [x] Add genre multi-select filter
+- [x] Add streaming service filter (Netflix, Disney+, Hulu, etc.)
+- [x] Add sort options (popularity, rating, release date)
+- [ ] Implement pagination for search results
+- [x] Add "Add to Watchlist" button on movie cards
+
+## Unified Watchlist System
+- [x] Create watchlist database table
+- [x] Implement duplicate prevention logic (by movieId)
+- [x] Create watchlist tRPC router with CRUD operations
+- [x] Build Watchlist page with grid view
+- [x] Add remove from watchlist functionality
+- [ ] Add "Already in watchlist" indicator in Browse
+- [ ] Migrate saved movies to watchlist system
+- [ ] Update matches to allow adding to watchlist

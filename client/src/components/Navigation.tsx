@@ -11,7 +11,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  Home
+  Home,
+  Search,
+  ListVideo
 } from "lucide-react";
 import { APP_TITLE } from "@/const";
 
@@ -33,8 +35,9 @@ export default function Navigation() {
 
   const navItems = [
     { path: "/swipe", label: "Swipe", icon: Heart },
+    { path: "/browse", label: "Browse", icon: Search },
     { path: "/groups", label: "Groups", icon: Users },
-    { path: "/saved", label: "Saved", icon: Bookmark },
+    { path: "/watchlist", label: "Watchlist", icon: ListVideo },
     { path: "/profile", label: "Profile", icon: User },
   ];
 

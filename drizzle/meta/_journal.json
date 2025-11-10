@@ -15,6 +15,13 @@
       "when": 1762790801488,
       "tag": "0001_petite_miracleman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1762795777766,
+      "tag": "0002_shallow_viper",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,8 @@ import Groups from "./pages/Groups";
 import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
 import Saved from "./pages/Saved";
+import Browse from "./pages/Browse";
+import Watchlist from "./pages/Watchlist";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -18,10 +20,12 @@ function Router() {
     <>
       <Navigation />
       <Switch>
-      <Route path={"/"} component={Home} />
+       <Route path="/" component={Home} />
       <Route path="/swipe" component={Swipe} />
+      <Route path="/browse" component={Browse} />
       <Route path="/groups" component={Groups} />
       <Route path="/matches/:id" component={Matches} />
+      <Route path="/watchlist" component={Watchlist} />
       <Route path="/profile" component={Profile} />
       <Route path="/saved" component={Saved} />
       <Route path={"/404"} component={NotFound} />

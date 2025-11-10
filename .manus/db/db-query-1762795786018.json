@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS watchlist (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  userId INT NOT NULL,\n  movieId VARCHAR(50) NOT NULL,\n  movieTitle TEXT NOT NULL,\n  moviePoster TEXT,\n  movieType ENUM('movie', 'tv') NOT NULL,\n  movieGenres JSON,\n  movieRating INT DEFAULT 0,\n  movieYear INT,\n  addedFrom ENUM('swipe', 'match', 'search', 'browse') NOT NULL,\n  watched BOOLEAN DEFAULT FALSE NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  UNIQUE KEY user_watchlist_movie_idx (userId, movieId)\n)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2eNqdHnpnVAGVpu.root --database GJvAyc4uSA6Y5a2E3cgCYe --execute CREATE TABLE IF NOT EXISTS watchlist (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  userId INT NOT NULL,\n  movieId VARCHAR(50) NOT NULL,\n  movieTitle TEXT NOT NULL,\n  moviePoster TEXT,\n  movieType ENUM('movie', 'tv') NOT NULL,\n  movieGenres JSON,\n  movieRating INT DEFAULT 0,\n  movieYear INT,\n  addedFrom ENUM('swipe', 'match', 'search', 'browse') NOT NULL,\n  watched BOOLEAN DEFAULT FALSE NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  UNIQUE KEY user_watchlist_movie_idx (userId, movieId)\n)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 250
+}

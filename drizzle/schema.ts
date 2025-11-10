@@ -146,6 +146,30 @@ export type SavedMovie = typeof savedMovies.$inferSelect;
 export type InsertSavedMovie = typeof savedMovies.$inferInsert;
 
 /**
+ * Watchlist table - unified system for movies users want to watch
+ * Prevents duplicates regardless of source (matches, search, swipe)
+ */
+export const watchlist = mysqlTable("watchlist", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  movieId: varchar("movieId", { length: 50 }).notNull(),
+  movieTitle: text("movieTitle").notNull(),
+  moviePoster: text("moviePoster"),
+  movieType: mysqlEnum("movieType", ["movie", "tv"]).notNull(),
+  movieGenres: json("movieGenres").$type<number[]>(),
+  movieRating: int("movieRating").default(0),
+  movieYear: int("movieYear"),
+  addedFrom: mysqlEnum("addedFrom", ["swipe", "match", "search", "browse"]).notNull(),
+  watched: boolean("watched").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userMovieIdx: uniqueIndex("user_watchlist_movie_idx").on(table.userId, table.movieId),
+}));
+
+export type Watchlist = typeof watchlist.$inferSelect;
+export type InsertWatchlist = typeof watchlist.$inferInsert;
+
+/**
  * Notifications for matches and group activity
  */
 export const notifications = mysqlTable("notifications", {
