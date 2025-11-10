@@ -154,3 +154,9 @@
 - [x] Show toast notification when link is copied
 - [x] Handle invalid session codes gracefully
 - [ ] Add social sharing options (WhatsApp, Telegram, etc.)
+
+## Infinite Scroll Enhancement
+- [x] Replace "Load More" button with automatic infinite scroll
+- [x] Implement Intersection Observer API for scroll detection
+- [x] Add loading spinner at bottom during fetch
+- [x] Handle edge cases (end of results, errors)

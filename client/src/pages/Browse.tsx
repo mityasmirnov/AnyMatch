@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { Search, Filter, Plus, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ export default function Browse() {
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [allMovies, setAllMovies] = useState<any[]>([]);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const toggleProvider = (providerId: number) => {
     setSelectedProviders((prev) =>
@@ -103,6 +104,29 @@ export default function Browse() {
   const displayMovies = allMovies;
   const isLoading = (page === 1) && (debouncedQuery ? searchLoading : moviesLoading);
   const isFetching = debouncedQuery ? searchFetching : moviesFetching;
+
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetching && displayMovies && displayMovies.length >= 20) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [isFetching, displayMovies]);
 
   // Check which movies are in watchlist
   const movieIds = displayMovies?.map((m: any) => m.id.toString()) || [];
