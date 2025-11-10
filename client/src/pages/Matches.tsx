@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useParams } from "wouter";
+import { useEffect } from "react";
 
 export default function Matches() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -26,6 +27,15 @@ export default function Matches() {
     { enabled: isAuthenticated && groupId !== null }
   );
 
+  // Redirect unauthenticated users or invalid group ID
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/");
+    } else if (!authLoading && !groupId) {
+      setLocation("/groups");
+    }
+  }, [authLoading, isAuthenticated, groupId, setLocation]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -34,13 +44,7 @@ export default function Matches() {
     );
   }
 
-  if (!isAuthenticated) {
-    setLocation("/");
-    return null;
-  }
-
-  if (!groupId) {
-    setLocation("/groups");
+  if (!isAuthenticated || !groupId) {
     return null;
   }
 

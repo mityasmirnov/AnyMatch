@@ -67,20 +67,21 @@ export const moviesRouter = router({
   getDetails: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: z.string(),
         type: z.enum(["movie", "tv"]),
       })
     )
     .query(async ({ input }) => {
+      const numericId = parseInt(input.id, 10);
       if (input.type === "movie") {
-        return tmdb.getMovieDetails(input.id);
+        return tmdb.getMovieDetails(numericId);
       } else {
-        return tmdb.getTVDetails(input.id);
+        return tmdb.getTVDetails(numericId);
       }
     }),
 
   /**
-   * Search movies/TV
+   * Search movies and TV shows
    */
   search: protectedProcedure
     .input(

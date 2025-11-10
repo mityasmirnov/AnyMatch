@@ -3,10 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Heart, Users, Sparkles, Film } from "lucide-react";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Redirect authenticated users to swipe page
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      setLocation("/swipe");
+    }
+  }, [isAuthenticated, loading, setLocation]);
 
   if (loading) {
     return (
@@ -17,7 +25,6 @@ export default function Home() {
   }
 
   if (isAuthenticated) {
-    setLocation("/swipe");
     return null;
   }
 

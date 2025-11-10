@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -85,6 +85,13 @@ export default function Groups() {
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  // Redirect unauthenticated users to home
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -94,7 +101,6 @@ export default function Groups() {
   }
 
   if (!isAuthenticated) {
-    setLocation("/");
     return null;
   }
 

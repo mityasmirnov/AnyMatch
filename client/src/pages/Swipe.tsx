@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import SwipeCard from "@/components/SwipeCard";
+import MovieDetailsModal from "@/components/MovieDetailsModal";
 import { Button } from "@/components/ui/button";
-import { Loader2, RotateCcw, Settings } from "lucide-react";
+import { Loader2, RotateCcw, Settings, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -13,6 +14,7 @@ export default function Swipe() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [movies, setMovies] = useState<any[]>([]);
   const [currentGroupId, setCurrentGroupId] = useState<number | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Fetch user groups
   const { data: groups } = trpc.groups.list.useQuery(undefined, {
@@ -84,6 +86,13 @@ export default function Swipe() {
     }
   }, [groups, currentGroupId]);
 
+  // Redirect unauthenticated users to home
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -93,7 +102,6 @@ export default function Swipe() {
   }
 
   if (!isAuthenticated) {
-    setLocation("/");
     return null;
   }
 
@@ -156,8 +164,9 @@ export default function Swipe() {
             <Button
               variant="ghost"
               size="icon"
-              className="glass"
-              onClick={() => setLocation("/groups")}
+              className="bg-white/5 backdrop-blur-xl border-white/10"
+              onClick={() => setLocation("/profile")}
+              title="Profile"
             >
               <Settings className="w-5 h-5" />
             </Button>
@@ -197,6 +206,16 @@ export default function Swipe() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-center gap-4 mt-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="glass w-14 h-14 rounded-full"
+              onClick={() => setShowDetailsModal(true)}
+              disabled={!currentMovie}
+            >
+              <Info className="w-6 h-6" />
+            </Button>
+
             <Button
               variant="ghost"
               size="icon"
@@ -242,6 +261,17 @@ export default function Swipe() {
             </p>
           </div>
         </div>
+
+        {/* Movie Details Modal */}
+        {currentMovie && (
+          <MovieDetailsModal
+            movieId={currentMovie.id}
+            movieType={currentMovie.type}
+            isOpen={showDetailsModal}
+            onClose={() => setShowDetailsModal(false)}
+            onSwipe={handleSwipe}
+          />
+        )}
       </div>
     </div>
   );
